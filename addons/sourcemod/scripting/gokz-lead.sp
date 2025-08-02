@@ -7,6 +7,10 @@ int leadUserClient = 0; // The player using the lead bot
 int leadBotClient = 0;  // The bot client in-game
 int leadBotIndex = -1;  // The replay bot index
 bool botPaused = false;
+int g_Beam = -1;
+float g_fLastPosition[MAXPLAYERS + 1][3];
+bool g_bTrail[MAXPLAYERS + 1];
+
 Handle hLeadTimer = INVALID_HANDLE;
 #define REPLAY_DIR_FORMAT "addons/sourcemod/data/gokz-replays/_runs/%s/"
 
@@ -44,7 +48,7 @@ public void OnMapStart() {
     leadBotIndex = -1;
     botPaused = false;
     hLeadTimer = INVALID_HANDLE;
-
+    g_Beam = PrecacheModel("materials/sprites/purplelaser1.vmt", true);
     if (GetClientCount(true) > 0) {
         CreateTimer(1.0, Timer_ReplayNext);
     }
@@ -72,7 +76,12 @@ public void OnPlayerDisconnect(Handle event, const char[] name, bool dontBroadca
             KillLeadTimer();
         }
         if (GetClientCount(true) == 0) {
-            // autoReplayActive = false;
+            // Kick all bots
+            for (int i = 1; i <= MaxClients; i++) {
+                if (IsClientInGame(i) && IsFakeClient(i)) {
+                    KickClient(i, "Server empty");
+                }
+            }
         }
     }
 }
@@ -121,6 +130,26 @@ void StartReplayForCurrentMap()
     LogMessage("[ReplayProgress] Loaded replay: %s", bestPath);
 }
 
+void kickNonReplayBot()
+{
+    for (int i = 1; i <= MaxClients; i++)
+    {
+        if (!IsClientInGame(i) || !IsFakeClient(i))
+            continue;
+
+        char name[MAX_NAME_LENGTH];
+        GetClientName(i, name, sizeof(name));
+
+        int len = strlen(name);
+        bool isReplay = (len >= 8 && StrContains(name, ":") != -1 && StrContains(name, ".") != -1 && name[len - 1] == ')');
+
+        if (!isReplay)
+        {
+            KickClient(i, "Kicking non-replay bot.");
+        }
+    }
+}
+
 public Action Command_Lead(int client, int args) {
     if (!IsClientInGame(client) || IsFakeClient(client)) return Plugin_Handled;
 
@@ -132,12 +161,16 @@ public Action Command_Lead(int client, int args) {
         leadUserClient = 0;
         leadBotClient = 0;
         leadBotIndex = -1;
+        g_bTrail[leadBotClient] = false;
+
         KillLeadTimer();
         return Plugin_Handled;
     }
 
     int stopDist = 500;
     int startDist = 200;
+
+    kickNonReplayBot()
 
     if (args >= 2) {
         char arg1[16], arg2[16];
@@ -164,6 +197,9 @@ public Action Command_Lead(int client, int args) {
             leadBotIndex = bot;
             leadBotClient = i;
             leadUserClient = client;
+            g_bTrail[leadBotClient] = true;
+            GetClientAbsOrigin(leadBotClient, g_fLastPosition[leadBotClient]);
+
             botPaused = false;
 
             char name[MAX_NAME_LENGTH];
@@ -181,10 +217,30 @@ public Action Command_Lead(int client, int args) {
         }
     }
     
-    // add bot for another player
+    // TODO: add bot for another player
     CPrintToChat(client, "{lightgreen}[gokz-lead]{default} No available replay bot found on this map.");
     return Plugin_Handled;
 }
+
+// Draw beam
+public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3], float angles[3],
+    int &weapon, int &subtype, int &cmdnum, int &tickcount, int &seed, int mouse[2])
+{
+    if (client == leadBotClient && g_bTrail[client] && IsPlayerAlive(client))
+    {
+        float v1[3], v2[3];
+        GetClientAbsOrigin(client, v1);
+        v2 = g_fLastPosition[client];
+
+        TE_SetupBeamPoints(v1, v2, g_Beam, 0, 0, 0, 2.5, 3.0, 3.0, 10, 0.0, {42, 165, 247, 255}, 0);
+        TE_SendToAll();
+
+        g_fLastPosition[client] = v1;
+    }
+
+    return Plugin_Continue;
+}
+
 
 public Action Timer_LeadCheck(Handle timer, any data)
 {
