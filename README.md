@@ -2,6 +2,8 @@
 
 A plugin that enables a replay bot to guide players ("lead") during gameplay on a GOKZ server.
 
+[![Video of the Plugin](https://img.youtube.com/vi/rh_xXcjZENM/0.jpg)](https://www.youtube.com/watch?v=rh_xXcjZENM)
+
 ## Features
 
 - Automatically plays a replay bot when players join the server (similar to KZTimer behavior)
@@ -12,9 +14,8 @@ A plugin that enables a replay bot to guide players ("lead") during gameplay on 
 
 ## Commands
 
-- `!lead [stopDist] [startDist]`: Start or stop following the lead bot  
-  - Default: `!lead` → `stopDist = 500`, `startDist = 200`  
-  - Custom: `!lead 800 300`
+- `!lead [stop distance] [start distance]`: How far away from you the bot will stop and start
+  - Default: `!lead` → `stop distance = 500`, `start distance = 200`  
 
 ## Requirements
 
