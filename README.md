@@ -36,7 +36,5 @@ A plugin that enables a replay bot to guide players ("lead") during gameplay on 
 - Check whether the player can see the bot (line-of-sight)
 - Support multiple players using lead bots simultaneously  
   - Use bot names to identify and kick them after use
-- Teleport the bot closer if it gets too far
 - Add player preferences for pause/resume distance
 - Add a ConVar to toggle automatic bot playback on map start (like KZTimer)
-- Option to prioritize NUB or PRO replays by default
