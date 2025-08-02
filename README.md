@@ -2,6 +2,8 @@
 
 A plugin that enables a replay bot to guide players ("lead") during gameplay on a GOKZ server.
 
+[![Video of the Plugin](https://img.youtube.com/vi/rh_xXcjZENM/0.jpg)](https://www.youtube.com/watch?v=rh_xXcjZENM)
+
 ## Features
 
 - Automatically plays a replay bot when players join the server (similar to KZTimer behavior)
