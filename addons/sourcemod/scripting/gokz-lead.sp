@@ -20,10 +20,6 @@ public Plugin myinfo =
 };
 
 public void OnPluginStart() {
-    if (!LibraryExists("gokz-replays")) {
-        SetFailState("GOKZ Replays plugin not found!");
-    }
-
     RegConsoleCmd("sm_lead", Command_Lead);
 }
 

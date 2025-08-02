@@ -38,3 +38,4 @@ A plugin that enables a replay bot to guide players ("lead") during gameplay on 
   - Use bot names to identify and kick them after use
 - Add player preferences for pause/resume distance
 - Add a ConVar to toggle automatic bot playback on map start (like KZTimer)
+- Restart when player start timer, and end lead when player end timer
