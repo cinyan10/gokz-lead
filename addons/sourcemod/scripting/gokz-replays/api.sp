@@ -64,8 +64,6 @@ public int Native_RP_GetPlaybackInfo(Handle plugin, int numParams)
 
 public int Native_RP_Pause(Handle plugin, int numParams)
 {
-	LogMessage("[ReplayAPI] GOKZ_RP_Pause called");
-
 	int bot = GetNativeCell(1);
 	if (bot < 0 || bot >= RP_MAX_BOTS) return false;
 
@@ -75,8 +73,6 @@ public int Native_RP_Pause(Handle plugin, int numParams)
 
 public int Native_RP_Resume(Handle plugin, int numParams)
 {
-	LogMessage("[ReplayAPI] GOKZ_RP_Resume called");
-
 	int bot = GetNativeCell(1);
 	if (bot < 0 || bot >= RP_MAX_BOTS) return false;
 

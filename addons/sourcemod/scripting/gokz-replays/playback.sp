@@ -228,23 +228,9 @@ void PlaybackTogglePause(int bot)
 	}
 }
 
-void PlaybackPause(int bot)
-{
-	if (!botPlaybackPaused[bot])  // 只有当状态从 false → true 时才打印
-	{
-		botPlaybackPaused[bot] = true;
-		LogMessage("bot %d PlaybackPause set to true", bot);
-	}
-}
+void PlaybackPause(int bot){botPlaybackPaused[bot] = true;}
 
-void PlaybackResume(int bot)
-{
-	if (botPlaybackPaused[bot])  // 只有当状态从 true → false 时才打印
-	{
-		botPlaybackPaused[bot] = false;
-		LogMessage("bot %d PlaybackPause set to false", bot);
-	}
-}
+void PlaybackResume(int bot){botPlaybackPaused[bot] = false;}
 
 void PlaybackSkipForward(int bot)
 {
