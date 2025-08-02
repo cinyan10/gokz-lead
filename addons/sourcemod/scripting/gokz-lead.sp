@@ -246,9 +246,8 @@ void StartLeadFromNearestPoint(int client, int botIndex)
 
 	if (closestTick != -1)
 	{
-		GOKZ_RP_SkipToTick(botIndex, closestTick);
-		GOKZ_RP_Resume(botIndex);
-    
+        GOKZ_RP_SkipToTick(botIndex, closestTick);
+        GOKZ_RP_Resume(botIndex);
         CPrintToChat(client, "{lightgreen}[gokz-lead]{default} Resuming replay from tick {teamcolor}%d{default} (closest distance: %.1f)", closestTick, closestDist);
 	}
 	else

@@ -225,6 +225,32 @@ forward void GOKZ_RP_OnTimerEnd_Post(int client, const char[] filePath, int cour
 
 
 // =====[ NATIVES ]====
+/**
+ * 获取某个 tick 的回放数据（统一 V1 / V2 格式，数据存储为 float/int 的数组）
+ *
+ * @param bot      GOKZ 内部 botIndex
+ * @param tick     tick 序号，从 0 开始
+ * @param data     接收数组，长度为 RP_V2_TICK_DATA_BLOCKSIZE（20）
+ * @return         true 成功，false 表示 tick 越界 或 bot 无效
+ */
+native bool GOKZ_RP_GetTickData(int bot, int tick, any output[RP_V2_TICK_DATA_BLOCKSIZE]);
+
+/**
+ * Skip replay playback to a specific tick.
+ *
+ * @param bot Replay bot index.
+ * @param tick Tick number to teleport to.
+ * @noreturn
+ */
+native bool GOKZ_RP_SkipToTick(int bot, int tick);
+
+/**
+ * Get total number of ticks for a replay bot.
+ *
+ * @param bot Replay bot index.
+ * @return Number of ticks in the replay.
+ */
+native int GOKZ_RP_GetTickCount(int bot);
 
 native bool GOKZ_RP_Pause(int botIndex);
 native bool GOKZ_RP_Resume(int botIndex);
