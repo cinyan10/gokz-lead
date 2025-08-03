@@ -27,21 +27,6 @@ public void OnPluginStart() {
     RegConsoleCmd("sm_lead", Command_Lead);
 }
 
-public void OnClientPutInServer(int client) {
-    if (!IsFakeClient(client)) {
-        int humanCount = 0;
-        for (int i = 1; i <= MaxClients; i++) {
-            if (i != client && IsClientInGame(i) && !IsFakeClient(i)) {
-                humanCount++;
-            }
-        }
-
-        if (humanCount == 0) {
-            StartReplayForCurrentMap();
-        }
-    }
-}
-
 public void OnMapStart() {
     leadUserClient = 0;
     leadBotClient = 0;
@@ -49,42 +34,76 @@ public void OnMapStart() {
     botPaused = false;
     hLeadTimer = INVALID_HANDLE;
     g_Beam = PrecacheModel("materials/sprites/purplelaser1.vmt", true);
-    if (GetClientCount(true) > 0) {
-        CreateTimer(1.0, Timer_ReplayNext);
+}
+
+public void OnClientPutInServer(int client) {
+    if (!IsFakeClient(client)) {
+        int humanCount = 0;
+        for (int i = 1; i <= MaxClients; i++) {
+            if (IsClientInGame(i) && !IsFakeClient(i)) {
+                humanCount++;
+            }
+        }
+
+        if (humanCount == 1) {
+            CreateTimer(0.5, Timer_KickBotsThenStartReplay, _, TIMER_FLAG_NO_MAPCHANGE);
+        }
     }
 }
 
-public void OnPlayerDisconnect(Handle event, const char[] name, bool dontBroadcast) {
+public Action Timer_KickBotsThenStartReplay(Handle timer, any data) {
+    ServerCommand("bot_kick")
+    CreateTimer(0.5, Timer_StartReplay, _, TIMER_FLAG_NO_MAPCHANGE);
+    return Plugin_Stop;
+}
+
+public Action Timer_StartReplay(Handle timer, any data) {
+    StartReplayForCurrentMap();
+    return Plugin_Stop;
+}
+
+public void OnPlayerDisconnect(Handle event, const char[] name, bool dontBroadcast)
+{
     int userid = GetEventInt(event, "userid");
     int client = GetClientOfUserId(userid);
     if (client <= 0) return;
 
-    if (IsFakeClient(client)) {
-        if (leadBotClient == client) {
-            leadBotClient = 0;
-            leadBotIndex = -1;
-            leadUserClient = 0;
-            KillLeadTimer();
-        }
-        if (GetClientCount(true) > 0) {
-            CreateTimer(1.0, Timer_ReplayNext);
-        }
-    } else {
-        if (leadUserClient == client) {
-            leadUserClient = 0;
-            leadBotIndex = -1;
-            KillLeadTimer();
-        }
-        if (GetClientCount(true) == 0) {
-            // Kick all bots
-            for (int i = 1; i <= MaxClients; i++) {
-                if (IsClientInGame(i) && IsFakeClient(i)) {
-                    KickClient(i, "Server empty");
-                }
-            }
-        }
+    if (leadUserClient == client) {
+        leadUserClient = 0;
+        leadBotIndex = -1;
+        KillLeadTimer();
     }
+
+    // Delay bot cleanup to allow player disconnect to complete
+    // CreateTimer(0.5, Timer_CheckKickBots, _, TIMER_FLAG_NO_MAPCHANGE);
 }
+
+// public Action Timer_CheckKickBots(Handle timer)
+// {
+//     int humans = 0;
+//     for (int i = 1; i <= MaxClients; i++)
+//     {
+//         if (IsClientInGame(i) && !IsFakeClient(i))
+//         {
+//             humans++;
+//         }
+//     }
+
+//     if (humans > 0)
+//         return Plugin_Stop;
+
+//     // No humans left: kick all bots, even unassigned
+//     for (int i = 1; i <= MaxClients; i++)
+//     {
+//         if (IsClientInGame(i) && IsFakeClient(i))
+//         {
+//             KickClient(i, "No humans left.");
+//             PrintToServer("KickBotCheck: Kicking bot %d (team=%d)", i, GetClientTeam(i));
+//         }
+//     }
+
+//     return Plugin_Stop;
+// }
 
 void KillLeadTimer() {
     if (hLeadTimer != INVALID_HANDLE) {
@@ -102,32 +121,24 @@ public int FindFirstHumanClient() {
     return 0;
 }
 
-public Action Timer_ReplayNext(Handle timer) {
-    int client = FindFirstHumanClient();
-    if (client != 0) {
-        StartReplayForCurrentMap();
-    }
-    return Plugin_Stop;
-}
-
 void StartReplayForCurrentMap()
 {
     char bestPath[PLATFORM_MAX_PATH];
     if (!FindBestReplayFilePath(bestPath, sizeof(bestPath)))
     {
-        LogMessage("[ReplayProgress] No valid replay found for this map.");
+        LogMessage("No valid replay found for this map.");
         return;
     }
-    LogMessage("[ReplayProgress] found best path %s", bestPath)
+    LogMessage("found best path %s", bestPath)
     int client = FindFirstHumanClient();
     if (client == 0)
     {
-        LogMessage("[ReplayProgress] No human client found.");
+        LogMessage("No human client found.");
         return;
     }
 
     GOKZ_RP_LoadJumpReplay(client, bestPath, true);
-    LogMessage("[ReplayProgress] Loaded replay: %s", bestPath);
+    LogMessage("Loaded replay: %s", bestPath);
 }
 
 void kickNonReplayBot()
