@@ -1,7 +1,9 @@
 #include <sourcemod>
-#include <gokz/replays>
 #include <sdktools>
 #include <colorlib>
+#include <gokz/replays>
+
+#include "gokz-lead/utils.sp"
 
 int leadUserClient = 0; // The player using the lead bot
 int leadBotClient = 0;  // The bot client in-game
@@ -12,11 +14,10 @@ float g_fLastPosition[MAXPLAYERS + 1][3];
 bool g_bTrail[MAXPLAYERS + 1];
 
 Handle hLeadTimer = INVALID_HANDLE;
-#define REPLAY_DIR_FORMAT "addons/sourcemod/data/gokz-replays/_runs/%s/"
 
 public Plugin myinfo = 
 {
-    name = "GOKZ Lead Bot",
+    name = "GOKZ Replay Bot Lead",
     author = "Cinyan10",
     description = "Allows players to follow a replay bot which pauses/resumes based on distance.",
     version = "1.0.0",
@@ -73,37 +74,42 @@ public void OnPlayerDisconnect(Handle event, const char[] name, bool dontBroadca
         leadBotIndex = -1;
         KillLeadTimer();
     }
-
-    // Delay bot cleanup to allow player disconnect to complete
-    // CreateTimer(0.5, Timer_CheckKickBots, _, TIMER_FLAG_NO_MAPCHANGE);
 }
 
-// public Action Timer_CheckKickBots(Handle timer)
-// {
-//     int humans = 0;
-//     for (int i = 1; i <= MaxClients; i++)
-//     {
-//         if (IsClientInGame(i) && !IsFakeClient(i))
-//         {
-//             humans++;
-//         }
-//     }
+public Action GOKZ_RP_OnReplaySaved(int client, int replayType, const char[] map, int course, int timeType, float time, const char[] filePath, bool tempReplay)
+{
+    // Delay replay check by 2 seconds to allow other replay operations (e.g. file moving) to complete
+    CreateTimer(2.0, Timer_CheckReplayUpdate, _, TIMER_FLAG_NO_MAPCHANGE);
+    return Plugin_Continue;
+}
 
-//     if (humans > 0)
-//         return Plugin_Stop;
+public Action Timer_CheckReplayUpdate(Handle timer, any data)
+{
+    char bestPath[PLATFORM_MAX_PATH];
+    if (!FindBestReplayFilePath(bestPath, sizeof(bestPath)))
+    {
+        return Plugin_Stop;
+    }
 
-//     // No humans left: kick all bots, even unassigned
-//     for (int i = 1; i <= MaxClients; i++)
-//     {
-//         if (IsClientInGame(i) && IsFakeClient(i))
-//         {
-//             KickClient(i, "No humans left.");
-//             PrintToServer("KickBotCheck: Kicking bot %d (team=%d)", i, GetClientTeam(i));
-//         }
-//     }
+    int bestTickCount = 0;
+    ReadReplayTickCount(bestPath, bestTickCount);
 
-//     return Plugin_Stop;
-// }
+    // Always reload if no bot is currently running
+    if (leadBotIndex == -1 || leadBotClient == 0 || !IsClientInGame(leadBotClient))
+    {
+        CreateTimer(0.1, Timer_KickBotsThenStartReplay, _, TIMER_FLAG_NO_MAPCHANGE);
+        return Plugin_Stop;
+    }
+
+    int currentTickCount = GOKZ_RP_GetTickCount(leadBotIndex);
+
+    if (bestTickCount != currentTickCount)
+    {
+        CreateTimer(0.1, Timer_KickBotsThenStartReplay, _, TIMER_FLAG_NO_MAPCHANGE);
+    }
+    return Plugin_Stop;
+}
+
 
 void KillLeadTimer() {
     if (hLeadTimer != INVALID_HANDLE) {
@@ -126,10 +132,8 @@ void StartReplayForCurrentMap()
     char bestPath[PLATFORM_MAX_PATH];
     if (!FindBestReplayFilePath(bestPath, sizeof(bestPath)))
     {
-        LogMessage("No valid replay found for this map.");
         return;
     }
-    LogMessage("found best path %s", bestPath)
     int client = FindFirstHumanClient();
     if (client == 0)
     {
@@ -139,26 +143,6 @@ void StartReplayForCurrentMap()
 
     GOKZ_RP_LoadJumpReplay(client, bestPath, true);
     LogMessage("Loaded replay: %s", bestPath);
-}
-
-void kickNonReplayBot()
-{
-    for (int i = 1; i <= MaxClients; i++)
-    {
-        if (!IsClientInGame(i) || !IsFakeClient(i))
-            continue;
-
-        char name[MAX_NAME_LENGTH];
-        GetClientName(i, name, sizeof(name));
-
-        int len = strlen(name);
-        bool isReplay = (len >= 8 && StrContains(name, ":") != -1 && StrContains(name, ".") != -1 && name[len - 1] == ')');
-
-        if (!isReplay)
-        {
-            KickClient(i, "Kicking non-replay bot.");
-        }
-    }
 }
 
 public Action Command_Lead(int client, int args) {
@@ -317,175 +301,4 @@ void StartLeadFromNearestPoint(int client, int botIndex)
 	{
         CPrintToChat(client, "{lightgreen}[gokz-lead]{default} No valid tick found.");
 	}
-}
-
-
-bool GetReplayTickOrigin(int botIndex, int tick, float vec[3])
-{
-	any data[RP_V2_TICK_DATA_BLOCKSIZE];
-	if (!GOKZ_RP_GetTickData(botIndex, tick, data))
-		return false;
-
-	vec[0] = data[7];  // origin.x
-	vec[1] = data[8];  // origin.y
-	vec[2] = data[9];  // origin.z
-	return true;
-}
-
-bool FindBestReplayFilePath(char[] outPath, int maxlen)
-{
-    char map[64];
-    GetCurrentMap(map, sizeof(map));
-
-    char dir[PLATFORM_MAX_PATH];
-    Format(dir, sizeof(dir), REPLAY_DIR_FORMAT, map); // e.g. "addons/sourcemod/data/gokz-replays/_runs/bkz_goldbhop/"
-
-    DirectoryListing files = OpenDirectory(dir);
-    if (files == null) return false;
-
-    int bestTicks = -1;
-    char bestPath[PLATFORM_MAX_PATH];
-    char fileName[PLATFORM_MAX_PATH];
-    FileType type;
-
-    while (files.GetNext(fileName, sizeof(fileName), type))
-    {
-        if (type != FileType_File || !StrContains(fileName, ".replay", false))
-            continue;
-
-        char fullPath[PLATFORM_MAX_PATH];
-        Format(fullPath, sizeof(fullPath), "%s%s", dir, fileName);
-
-        int tickCount, course;
-        char mapName[64];
-        ReadReplayHeader(fullPath, tickCount, mapName, sizeof(mapName), course);
-
-        // 必须是当前地图 & course 0
-        if (!StrEqual(mapName, map, false) || course != 0)
-            continue;
-
-        if (bestTicks == -1 || tickCount < bestTicks)
-        {
-            bestTicks = tickCount;
-            strcopy(bestPath, sizeof(bestPath), fullPath);
-        }
-    }
-
-    delete files;
-
-    if (bestTicks > 0)
-    {
-        strcopy(outPath, maxlen, bestPath);
-        LogMessage("Best replay path: %s (tickCount = %d)", bestPath, bestTicks);
-        return true;
-    }
-
-    return false;
-}
-
-void ReadReplayHeader(const char[] path, int &tickCount, char[] mapNameOut, int mapNameSize, int &course)
-{
-    File file = OpenFile(path, "rb");
-    if (file == null) {
-        LogMessage("[ReplayLoader] Failed to open file: %s", path);
-        return;
-    }
-
-    int magic; file.ReadInt32(magic);
-    int format; file.ReadInt8(format);
-    int type; file.ReadInt8(type); // 0=Run, 1=Jump, 2=Cheater
-
-    int len;
-    char mapName[64];
-
-    if (format == 1)
-    {
-        // Skip GOKZ version
-        file.ReadInt8(len);
-        file.Seek(len, SEEK_CUR);
-
-        // Map name
-        file.ReadInt8(len);
-        file.ReadString(mapName, sizeof(mapName), len);
-        mapName[len] = '\0';
-
-        // Read course
-        file.ReadInt32(course);
-
-        // Skip mode + style (2x Int32)
-        file.Seek(8, SEEK_CUR);
-
-        // Skip time, teleports, steamID (3x Int32)
-        file.Seek(12, SEEK_CUR);
-
-        // Skip SteamID2
-        file.ReadInt8(len);
-        file.Seek(len, SEEK_CUR);
-
-        // Skip IP
-        file.ReadInt8(len);
-        file.Seek(len, SEEK_CUR);
-
-        // Skip alias
-        file.ReadInt8(len);
-        file.Seek(len, SEEK_CUR);
-
-        // Read tick count
-        file.ReadInt32(tickCount);
-    }
-    else if (format == 2)
-    {
-        // Skip GOKZ version
-        file.ReadInt8(len);
-        file.Seek(len, SEEK_CUR);
-
-        // Map name
-        file.ReadInt8(len);
-        file.ReadString(mapName, sizeof(mapName), len);
-        mapName[len] = '\0';
-
-        // Skip mapFileSize, ip, timestamp (3x Int32)
-        file.Seek(12, SEEK_CUR);
-
-        // Skip alias
-        file.ReadInt8(len);
-        file.Seek(len, SEEK_CUR);
-
-        // Skip steamid (Int32), mode (Int8), style (Int8), sens (Int32), yaw (Int32), tickrate (Int32)
-        file.Seek(4 + 1 + 1 + 4 + 4 + 4, SEEK_CUR);
-
-        // Read tick count
-        file.ReadInt32(tickCount);
-
-        // Skip weapon, knife
-        file.Seek(8, SEEK_CUR);
-
-        // If it's a run, read time and course
-        if (type == ReplayType_Run)
-        {
-            // Skip time
-            file.Seek(4, SEEK_CUR);
-
-            // Read course
-            file.ReadInt8(course);
-        }
-        else
-        {
-            course = -1; // N/A
-        }
-    }
-    else
-    {
-        LogMessage("[ReplayLoader] Unknown replay format: %d", format);
-        delete file;
-        return;
-    }
-
-    // Copy map name out
-    strcopy(mapNameOut, mapNameSize, mapName);
-
-    LogMessage("[ReplayLoader] Header Info:\n Format = %d\n Type = %d\n Map = %s\n Course = %d\n TickCount = %d",
-        format, type, mapNameOut, course, tickCount);
-
-    delete file;
 }
