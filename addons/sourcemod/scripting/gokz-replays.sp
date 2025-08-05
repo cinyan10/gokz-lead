@@ -271,10 +271,6 @@ public void GOKZ_OnCountedTeleport_Post(int client)
 
 public void GOKZ_LR_OnRecordMissed(int client, float recordTime, int course, int mode, int style, int recordType)
 {
-	if (recordType == RecordType_Nub)
-	{
-		gB_NubRecordMissed[client] = true;
-	}
 	GOKZ_LR_OnRecordMissed_Recording(client, recordType);
 }
 
