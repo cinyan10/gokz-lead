@@ -1,6 +1,5 @@
 #include <sourcemod>
 #include <sdktools>
-#include <colorlib>
 
 #include <gokz/core>
 #include <gokz/replays>
@@ -10,7 +9,7 @@
 
 // Handle hLeadTimer = INVALID_HANDLE;
 int g_BeamIndex = -1;
-
+static bool hasSpawned[MAXPLAYERS + 1];
 
 public Plugin myinfo = 
 {
@@ -25,6 +24,7 @@ public void OnPluginStart() {
     LeadBot_Reset();
     RegConsoleCmd("sm_lead", Command_Lead);
     RegConsoleCmd("sm_ghost", Command_Ghost); // new
+    HookEvent("player_spawn", OnPlayerSpawn, EventHookMode_Post);
 }
 
 public void OnMapStart() {
@@ -33,6 +33,17 @@ public void OnMapStart() {
 }
 
 public void OnClientPutInServer(int client) {
+    OnClientPutInServer_FirstSpawn(client);
+}
+
+void OnClientPutInServer_FirstSpawn(int client)
+{
+	hasSpawned[client] = false;
+}
+
+public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)  // player_spawn post hook
+{
+    int client = GetClientOfUserId(event.GetInt("userid"));
     if (!IsFakeClient(client)) {
         int humanCount = 0;
         for (int i = 1; i <= MaxClients; i++) {
@@ -136,13 +147,13 @@ public Action Command_Ghost(int client, int args)
     {
         GOKZ_RP_Resume(g_Lead.botIndex);
         LeadBot_Reset();
-        CPrintToChat(client, "{lightgreen}[gokz-lead]{default} Ghost stopped.");
+        GOKZ_PrintToChat(client, true, "Ghost stopped.");
         return Plugin_Handled;
     }
 
     if (LeadBot_IsValid())
     {
-        CPrintToChat(client, "{lightgreen}[gokz-lead]{default} Another player is already using the replay bot.");
+        GOKZ_PrintToChat(client, true, "Another player is already using the replay bot.");
         return Plugin_Handled;
     }
 
@@ -159,12 +170,12 @@ public Action Command_Ghost(int client, int args)
 
             char name[MAX_NAME_LENGTH];
             GetClientName(i, name, sizeof(name));
-            CPrintToChat(client, "{lightgreen}[gokz-lead]{default} Using existing replay bot {teamcolor}%s{default} as your ghost. Use !ghost again to stop.", name);
+            GOKZ_PrintToChat(client, true, "Using existing replay bot {teamcolor}%s{default} as your ghost. Use !ghost again to stop.", name);
             return Plugin_Handled;
         }
     }
 
-    CPrintToChat(client, "{lightgreen}[gokz-lead]{default} No available replay bot found on this map.");
+    GOKZ_PrintToChat(client, true, "No available replay bot found on this map.");
     return Plugin_Handled;
 }
 
@@ -177,7 +188,7 @@ public Action Command_Lead(int client, int args) {
         GOKZ_RP_Resume(g_Lead.botIndex);
         LeadBot_Reset();
 
-        CPrintToChat(client, "{lightgreen}[gokz-lead]{default} Lead stopped.");
+        GOKZ_PrintToChat(client, true, "Lead stopped.");
         return Plugin_Handled;
     }
 
@@ -192,13 +203,13 @@ public Action Command_Lead(int client, int args) {
         startDist = StringToInt(arg2);
 
         if (startDist <= 10 || startDist >= 500 || stopDist <= 300 || stopDist >= 1000 || stopDist <= startDist) {
-            CPrintToChat(client, "{lightgreen}[gokz-lead]{default} Invalid distances. Use: 300 < stopDist < 1000, 10 < startDist < 500, and stopDist > startDist.");
+            GOKZ_PrintToChat(client, true, "Invalid distances. Use: 300 < stopDist < 1000, 10 < startDist < 500, and stopDist > startDist.");
             return Plugin_Handled;
         }
     }
 
     if (LeadBot_IsValid()) {
-        CPrintToChat(client, "{lightgreen}[gokz-lead]{default} Another player is already using the lead bot.");
+        GOKZ_PrintToChat(client, true, "Another player is already using the lead bot.");
         return Plugin_Handled;
     }
 
@@ -214,7 +225,7 @@ public Action Command_Lead(int client, int args) {
 
             char name[MAX_NAME_LENGTH];
             GetClientName(i, name, sizeof(name));
-            CPrintToChat(client, "{lightgreen}[gokz-lead]{default} Using existing replay bot {teamcolor}%s{default} as your lead. Use !lead again to stop.", name);
+            GOKZ_PrintToChat(client, true, "Using existing replay bot {teamcolor}%s{default} as your lead. Use !lead again to stop.", name);
 
             StartLeadFromNearestPoint(g_Lead.user, g_Lead.botIndex);
 
@@ -227,7 +238,7 @@ public Action Command_Lead(int client, int args) {
     }
     
     // TODO: add bot for another player
-    CPrintToChat(client, "{lightgreen}[gokz-lead]{default} No available replay bot found on this map.");
+    GOKZ_PrintToChat(client, true, "No available replay bot found on this map.");
     return Plugin_Handled;
 }
 
@@ -303,11 +314,11 @@ void StartLeadFromNearestPoint(int client, int botIndex)
 	{
         GOKZ_RP_SkipToTick(botIndex, closestTick);
         GOKZ_RP_Resume(botIndex);
-        CPrintToChat(client, "{lightgreen}[gokz-lead]{default} Resuming replay from tick {teamcolor}%d{default} (closest distance: %.1f)", closestTick, closestDist);
+        GOKZ_PrintToChat(client, true, "Resuming replay from tick {teamcolor}%d{default} (closest distance: %.1f)", closestTick, closestDist);
 	}
 	else
 	{
-        CPrintToChat(client, "{lightgreen}[gokz-lead]{default} No valid tick found.");
+        GOKZ_PrintToChat(client, true, "No valid tick found.");
 	}
 }
 
