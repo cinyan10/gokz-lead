@@ -1,0 +1,218 @@
+L 08/05/2025 - 16:20:44: [SM] Blaming: gokz-lead.smx
+L 08/05/2025 - 16:20:44: [SM] Call stack trace:
+L 08/05/2025 - 16:20:44: [SM]   [0] CloseHandle
+L 08/05/2025 - 16:20:44: [SM]   [1] Line 116, d:\Exa\Documents\Code\SourcePawn\gokz-lead\addons\sourcemod\scripting\gokz-lead.sp::KillLeadTimer
+L 08/05/2025 - 16:20:44: [SM]   [2] Line 161, d:\Exa\Documents\Code\SourcePawn\gokz-lead\addons\sourcemod\scripting\gokz-lead.sp::Command_Lead
+L 08/05/2025 - 16:20:44: [SM] Exception reported: Handle cba046e6 is invalid (error 3)
+L 08/05/2025 - 16:20:44: [SM] Blaming: gokz-lead.smx
+L 08/05/2025 - 16:20:44: [SM] Call stack trace:
+L 08/05/2025 - 16:20:44: [SM]   [0] CloseHandle
+L 08/05/2025 - 16:20:44: [SM]   [1] Line 116, d:\Exa\Documents\Code\SourcePawn\gokz-lead\addons\sourcemod\scripting\gokz-lead.sp::KillLeadTimer
+L 08/05/2025 - 16:20:44: [SM]   [2] Line 206, d:\Exa\Documents\Code\SourcePawn\gokz-lead\addons\sourcemod\scripting\gokz-lead.sp::Command_Lead
+L 08/05/2025 - 16:21:32: [SM] Exception reported: Handle cba046e6 is invalid (error 1)
+L 08/05/2025 - 16:21:32: [SM] Blaming: gokz-lead.smx
+L 08/05/2025 - 16:21:32: [SM] Call stack trace:
+L 08/05/2025 - 16:21:32: [SM]   [0] CloseHandle
+L 08/05/2025 - 16:21:32: [SM]   [1] Line 116, d:\Exa\Documents\Code\SourcePawn\gokz-lead\addons\sourcemod\scripting\gokz-lead.sp::KillLeadTimer
+L 08/05/2025 - 16:21:32: [SM]   [2] Line 161, d:\Exa\Documents\Code\SourcePawn\gokz-lead\addons\sourcemod\scripting\gokz-lead.sp::Command_Lead
+L 08/05/2025 - 16:21:32: [SM] Exception reported: Handle cba046e6 is invalid (error 3)
+L 08/05/2025 - 16:21:32: [SM] Blaming: gokz-lead.smx
+L 08/05/2025 - 16:21:32: [SM] Call stack trace:
+L 08/05/2025 - 16:21:32: [SM]   [0] CloseHandle
+L 08/05/2025 - 16:21:32: [SM]   [1] Line 116, d:\Exa\Documents\Code\SourcePawn\gokz-lead\addons\sourcemod\scripting\gokz-lead.sp::KillLeadTimer
+L 08/05/2025 - 16:21:32: [SM]   [2] Line 206, d:\Exa\Documents\Code\SourcePawn\gokz-lead\addons\sourcemod\scripting\gokz-lead.sp::Command_Lead
+
+L 08/05/2025 - 16:14:29: [SM] Call stack trace:
+L 08/05/2025 - 16:14:29: [SM]   [0] GetClientAbsOrigin
+L 08/05/2025 - 16:14:29: [SM]   [1] Line 196, d:\Exa\Documents\Code\SourcePawn\gokz-lead\addons\sourcemod\scripting\gokz-lead.sp::Command_Lead
+L 08/05/2025 - 16:15:37: "Colin<359><BOT><>" connected, address ""
+L 08/05/2025 - 16:15:37: "100,10?<356><STEAM_1:1:852206558>" switched from team <CT> to <Spectator>
+L 08/05/2025 - 16:15:37: [gokz-replays.smx] [DEBUG] ClearClientRecordingState: Disabling replay for client=Colin
+L 08/05/2025 - 16:15:37: "Colin<359><BOT>" switched from team <Unassigned> to <TERRORIST>
+L 08/05/2025 - 16:15:37: "Colin<359><BOT><>" entered the game
+L 08/05/2025 - 16:15:37: "Colin<359><BOT><TERRORIST>" changed name to "不重生了，我是老六:-D (04:20.95)"
+L 08/05/2025 - 16:15:37: "Tim<360><BOT><>" connected, address ""
+L 08/05/2025 - 16:15:37: [gokz-replays.smx] [DEBUG] ClearClientRecordingState: Disabling replay for client=Tim
+L 08/05/2025 - 16:15:37: "Tim<360><BOT>" switched from team <Unassigned> to <CT>
+L 08/05/2025 - 16:15:37: "Tim<360><BOT><>" entered the game
+L 08/05/2025 - 16:15:37: "不重生了，我是老六:-D (04:20.95)<359><BOT><TERRORIST>" [-328 -248 64] committed suicide with "world"
+L 08/05/2025 - 16:15:37: "不重生了，我是老六:-D (04:20.95)<359><BOT>" switched from team <TERRORIST> to <CT>
+PutClientInServer: no info_player_start on level
+L 08/05/2025 - 16:15:37: "不重生了，我是老六:-D (04:20.95)<359><BOT>" switched from team <CT> to <TERRORIST>
+L 08/05/2025 - 16:15:37: "不重生了，我是老六:-D (04:20.95)<359><BOT>" switched from team <TERRORIST> to <CT>
+CT bot spawned outside of a buy zone (-335, -168, 0)
+CT bot spawned outside of a buy zone (-1200, 475, 328)
+L 08/05/2025 - 16:15:38: "100,10?<356><STEAM_1:1:852206558>" switched from team <Spectator> to <CT>
+L 08/05/2025 - 16:15:39: "不重生了，我是老六:-D (04:20.95)<359><BOT><CT>" disconnected (reason "Kicked by Console")
+L 08/05/2025 - 16:15:39: [gokz-replays.smx] [DEBUG] ClearClientRecordingState: Disabling replay for client=不重生了，我是老六:-D (04:20.95)
+L 08/05/2025 - 16:15:39: "不重生了，我是老六:-D (04:20.95)<359><BOT>" switched from team <CT> to <Unassigned>
+L 08/05/2025 - 16:15:39: [SM] Exception reported: Client 2 is not in game
+L 08/05/2025 - 16:15:39: [SM] Blaming: gokz-lead.smx
+L 08/05/2025 - 16:15:39: [SM] Call stack trace:
+L 08/05/2025 - 16:15:39: [SM]   [0] GetClientAbsOrigin
+L 08/05/2025 - 16:15:39: [SM]   [1] Line 196, d:\Exa\Documents\Code\SourcePawn\gokz-lead\addons\sourcemod\scripting\gokz-lead.sp::Command_Lead
+L 08/05/2025 - 16:15:39: "Tim<360><BOT><CT>" disconnected (reason "Kicked by Console : Kicking non-replay bot.")
+L 08/05/2025 - 16:15:39: [gokz-replays.smx] [DEBUG] ClearClientRecordingState: Disabling replay for client=Tim
+L 08/05/2025 - 16:15:39: "Tim<360><BOT>" switched from team <CT> to <Unassigned>
+L 08/05/2025 - 16:15:43: "Tom<361><BOT><>" connected, address ""
+L 08/05/2025 - 16:15:43: "100,10?<356><STEAM_1:1:852206558>" switched from team <CT> to <Spectator>
+L 08/05/2025 - 16:15:43: [gokz-replays.smx] [DEBUG] ClearClientRecordingState: Disabling replay for client=Tom
+L 08/05/2025 - 16:15:43: "Tom<361><BOT>" switched from team <Unassigned> to <TERRORIST>
+L 08/05/2025 - 16:15:43: "Tom<361><BOT><>" entered the game
+L 08/05/2025 - 16:15:43: "Tom<361><BOT><TERRORIST>" changed name to "不重生了，我是老六:-D (04:20.95)"
+L 08/05/2025 - 16:15:43: "Dennis<362><BOT><>" connected, address ""
+L 08/05/2025 - 16:15:43: [gokz-replays.smx] [DEBUG] ClearClientRecordingState: Disabling replay for client=Dennis
+L 08/05/2025 - 16:15:43: "Dennis<362><BOT>" switched from team <Unassigned> to <CT>
+L 08/05/2025 - 16:15:43: "Dennis<362><BOT><>" entered the game
+L 08/05/2025 - 16:15:43: "不重生了，我是老六:-D (04:20.95)<361><BOT><TERRORIST>" [-328 -248 64] committed suicide with "world"
+L 08/05/2025 - 16:15:43: "不重生了，我是老六:-D (04:20.95)<361><BOT>" switched from team <TERRORIST> to <CT>
+PutClientInServer: no info_player_start on level
+L 08/05/2025 - 16:15:43: "不重生了，我是老六:-D (04:20.95)<361><BOT>" switched from team <CT> to <TERRORIST>
+L 08/05/2025 - 16:15:43: "不重生了，我是老六:-D (04:20.95)<361><BOT>" switched from team <TERRORIST> to <CT>
+CT bot spawned outside of a buy zone (-336, -170, 0)
+CT bot spawned outside of a buy zone (-1200, 475, 328)
+L 08/05/2025 - 16:15:47: "100,10?<356><STEAM_1:1:852206558>" switched from team <Spectator> to <CT>
+L 08/05/2025 - 16:15:47: "不重生了，我是老六:-D (04:20.95)<361><BOT><CT>" disconnected (reason "Kicked by Console")
+L 08/05/2025 - 16:15:47: [gokz-replays.smx] [DEBUG] ClearClientRecordingState: Disabling replay for client=不重生了，我是老六
+:-D (04:20.95)
+L 08/05/2025 - 16:15:47: "不重生了，我是老六:-D (04:20.95)<361><BOT>" switched from team <CT> to <Unassigned>
+MasterRequestRestart
+Your server needs to be restarted in order to receive the latest update.
+L 08/05/2025 - 16:15:48: Your server needs to be restarted in order to receive the latest update.
+L 08/05/2025 - 16:15:50: [SM] Exception reported: Client 2 is not in game
+L 08/05/2025 - 16:15:50: [SM] Blaming: gokz-lead.smx
+L 08/05/2025 - 16:15:50: [SM] Call stack trace:
+L 08/05/2025 - 16:15:50: [SM]   [0] GetClientAbsOrigin
+L 08/05/2025 - 16:15:50: [SM]   [1] Line 196, d:\Exa\Documents\Code\SourcePawn\gokz-lead\addons\sourcemod\scripting\gokz-lead.sp::Command_Lead
+L 08/05/2025 - 16:15:50: "Dennis<362><BOT><CT>" disconnected (reason "Kicked by Console : Kicking non-replay bot.")
+L 08/05/2025 - 16:15:50: [gokz-replays.smx] [DEBUG] ClearClientRecordingState: Disabling replay for client=Dennis
+L 08/05/2025 - 16:15:50: "Dennis<362><BOT>" switched from team <CT> to <Unassigned>
+L 08/05/2025 - 16:15:55: "Tim<363><BOT><>" connected, address ""
+L 08/05/2025 - 16:15:55: "100,10?<356><STEAM_1:1:852206558>" switched from team <CT> to <Spectator>
+L 08/05/2025 - 16:15:55: [gokz-replays.smx] [DEBUG] ClearClientRecordingState: Disabling replay for client=Tim
+L 08/05/2025 - 16:15:55: "Tim<363><BOT>" switched from team <Unassigned> to <TERRORIST>
+L 08/05/2025 - 16:15:55: "Tim<363><BOT><>" entered the game
+L 08/05/2025 - 16:15:55: "Tim<363><BOT><TERRORIST>" changed name to "不重生了，我是老六:-D (06:46.31)"
+L 08/05/2025 - 16:15:55: "Gary<364><BOT><>" connected, address ""
+L 08/05/2025 - 16:15:55: [gokz-replays.smx] [DEBUG] ClearClientRecordingState: Disabling replay for client=Gary
+L 08/05/2025 - 16:15:55: "Gary<364><BOT>" switched from team <Unassigned> to <CT>
+L 08/05/2025 - 16:15:55: "Gary<364><BOT><>" entered the game
+L 08/05/2025 - 16:15:55: "不重生了，我是老六:-D (06:46.31)<363><BOT><TERRORIST>" [-328 -248 64] committed suicide with "world"
+L 08/05/2025 - 16:15:55: "不重生了，我是老六:-D (06:46.31)<363><BOT>" switched from team <TERRORIST> to <CT>
+PutClientInServer: no info_player_start on level
+L 08/05/2025 - 16:15:55: "不重生了，我是老六:-D (06:46.31)<363><BOT>" switched from team <CT> to <TERRORIST>
+L 08/05/2025 - 16:15:55: "不重生了，我是老六:-D (06:46.31)<363><BOT>" switched from team <TERRORIST> to <CT>
+CT bot spawned outside of a buy zone (-336, -169, 0)
+CT bot spawned outside of a buy zone (-414, -462, 40)
+MasterRequestRestart
+Your server needs to be restarted in order to receive the latest update.
+L 08/05/2025 - 16:15:58: Your server needs to be restarted in order to receive the latest update.
+L 08/05/2025 - 16:16:00: "100,10?<356><STEAM_1:1:852206558>" switched from team <Spectator> to <CT>
+L 08/05/2025 - 16:16:00: "不重生了，我是老六:-D (06:46.31)<363><BOT><CT>" disconnected (reason "Kicked by Console")
+L 08/05/2025 - 16:16:00: [gokz-replays.smx] [DEBUG] ClearClientRecordingState: Disabling replay for client=不重生了，我是老六
+:-D (06:46.31)
+L 08/05/2025 - 16:16:00: "不重生了，我是老六:-D (06:46.31)<363><BOT>" switched from team <CT> to <Unassigned>
+L 08/05/2025 - 16:16:01: [SM] Exception reported: Client 2 is not in game
+L 08/05/2025 - 16:16:01: [SM] Blaming: gokz-lead.smx
+L 08/05/2025 - 16:16:01: [SM] Call stack trace:
+L 08/05/2025 - 16:16:01: [SM]   [0] GetClientAbsOrigin
+L 08/05/2025 - 16:16:01: [SM]   [1] Line 196, d:\Exa\Documents\Code\SourcePawn\gokz-lead\addons\sourcemod\scripting\gokz-lead.sp::Command_Lead
+L 08/05/2025 - 16:16:01: "Gary<364><BOT><CT>" disconnected (reason "Kicked by Console : Kicking non-replay bot.")
+L 08/05/2025 - 16:16:01: [gokz-replays.smx] [DEBUG] ClearClientRecordingState: Disabling replay for client=Gary
+L 08/05/2025 - 16:16:01: "Gary<364><BOT>" switched from team <CT> to <Unassigned>
+L 08/05/2025 - 16:16:03: [SM] Exception reported: Client 2 is not in game
+L 08/05/2025 - 16:16:03: [SM] Blaming: gokz-lead.smx
+L 08/05/2025 - 16:16:03: [SM] Call stack trace:
+L 08/05/2025 - 16:16:03: [SM]   [0] GetClientAbsOrigin
+L 08/05/2025 - 16:16:03: [SM]   [1] Line 196, d:\Exa\Documents\Code\SourcePawn\gokz-lead\addons\sourcemod\scripting\gokz-lead.sp::Command_Lead
+MasterRequestRestart
+Your server needs to be restarted in order to receive the latest update.
+L 08/05/2025 - 16:16:11: Your server needs to be restarted in order to receive the latest update.
+L 08/05/2025 - 16:17:28: [SM] Exception reported: Client 2 is not in game
+L 08/05/2025 - 16:17:28: [SM] Blaming: gokz-lead.smx
+L 08/05/2025 - 16:17:28: [SM] Call stack trace:
+L 08/05/2025 - 16:17:28: [SM]   [0] GetClientAbsOrigin
+L 08/05/2025 - 16:17:28: [SM]   [1] Line 196, d:\Exa\Documents\Code\SourcePawn\gokz-lead\addons\sourcemod\scripting\gokz-lead.sp::Command_Lead
+
+
+
+L 08/05/2025 - 16:49:41: World triggered "Restart_Round_(1_second)"
+L 08/05/2025 - 16:49:41: Team "CT" scored "0" with "0" players
+L 08/05/2025 - 16:49:41: Team "TERRORIST" scored "0" with "0" players
+L 08/05/2025 - 16:49:42: Starting Freeze period
+L 08/05/2025 - 16:49:43: World triggered "Match_Start" on "kz_bhop_mentalism"
+L 08/05/2025 - 16:49:43: MatchStatus: Team "CT" is unset.
+L 08/05/2025 - 16:49:43: MatchStatus: Team "TERRORIST" is unset.
+L 08/05/2025 - 16:49:43: MatchStatus: Score: 0:0 on map "kz_bhop_mentalism" RoundsPlayed: 0
+L 08/05/2025 - 16:49:43: World triggered "Round_Start"
+L 08/05/2025 - 16:49:43: "100,10?<374><STEAM_1:1:852206558><>" STEAM USERID validated
+
+
+L 08/05/2025 - 16:49:57: "100,10?<374><STEAM_1:1:852206558><>" entered the game
+L 08/05/2025 - 16:49:57: [gokz-lead.smx] Loaded replay: addons/sourcemod/data/gokz-replays/_runs/kz_bhop_mentalism/0_SKZ_NRM_PRO.replay
+L 08/05/2025 - 16:49:57: "Norm<375><BOT><>" connected, address ""
+L 08/05/2025 - 16:49:57: "Norm<375><BOT>" switched from team <Unassigned> to <TERRORIST>
+L 08/05/2025 - 16:49:57: "Norm<375><BOT><>" entered the game
+L 08/05/2025 - 16:49:57: "Norm<375><BOT><TERRORIST>" changed name to "... (05:02.56)"
+L 08/05/2025 - 16:49:57: "... (05:02.56)<375><BOT><TERRORIST>" [3296 6552 1656] committed suicide with "world"
+L 08/05/2025 - 16:49:57: "... (05:02.56)<375><BOT>" switched from team <TERRORIST> to <CT>
+
+L 08/05/2025 - 16:50:00: "... (05:02.56)<375><BOT><CT>" disconnected (reason "Kicked by Console")
+L 08/05/2025 - 16:50:00: "... (05:02.56)<375><BOT>" switched from team <CT> to <Unassigned>
+L 08/05/2025 - 16:50:00: "Paul<376><BOT><>" connected, address ""
+L 08/05/2025 - 16:50:00: "Paul<376><BOT>" switched from team <Unassigned> to <TERRORIST>
+L 08/05/2025 - 16:50:00: "Paul<376><BOT><>" entered the game
+Terrorist bot spawned outside of a buy zone (3302, 6547, 1592)
+L 08/05/2025 - 16:50:03: "100,10?<374><STEAM_1:1:852206558>" switched from team <Unassigned> to <CT>
+L 08/05/2025 - 16:50:03: "Paul<376><BOT><TERRORIST>" disconnected (reason "Kicked by Console")
+L 08/05/2025 - 16:50:03: "Paul<376><BOT>" switched from team <TERRORIST> to <Unassigned>
+MasterRequestRestart
+Your server needs to be restarted in order to receive the latest update.
+L 08/05/2025 - 16:50:07: Your server needs to be restarted in order to receive the latest update.
+[KZT Pro] 100,10? : )
+L 08/05/2025 - 16:53:50: "100,10?<374><STEAM_1:1:852206558>" switched from team <CT> to <Spectator>
+L 08/05/2025 - 16:53:50: "Keith<377><BOT><>" connected, address ""
+L 08/05/2025 - 16:53:50: "Keith<377><BOT>" switched from team <Unassigned> to <TERRORIST>
+L 08/05/2025 - 16:53:50: "Keith<377><BOT><>" entered the game
+Terrorist bot spawned outside of a buy zone (3298, 6550, 1592)
+L 08/05/2025 - 16:53:50: "100,10?<374><STEAM_1:1:852206558>" switched from team <Spectator> to <TERRORIST>
+L 08/05/2025 - 16:53:50: "Keith<377><BOT><TERRORIST>" disconnected (reason "Kicked by Console")
+L 08/05/2025 - 16:53:50: "Keith<377><BOT>" switched from team <TERRORIST> to <Unassigned>
+L 08/05/2025 - 16:53:51: "100,10?<374><STEAM_1:1:852206558>" switched from team <TERRORIST> to <Spectator>
+L 08/05/2025 - 16:53:51: "Colin<378><BOT><>" connected, address ""
+L 08/05/2025 - 16:53:51: "Colin<378><BOT>" switched from team <Unassigned> to <TERRORIST>
+L 08/05/2025 - 16:53:51: "Colin<378><BOT><>" entered the game
+Terrorist bot spawned outside of a buy zone (3296, 6552, 1592)
+L 08/05/2025 - 16:53:52: "100,10?<374><STEAM_1:1:852206558>" switched from team <Spectator> to <TERRORIST>
+L 08/05/2025 - 16:53:52: "Colin<378><BOT><TERRORIST>" disconnected (reason "Kicked by Console")
+L 08/05/2025 - 16:53:52: "Colin<378><BOT>" switched from team <TERRORIST> to <Unassigned>
+L 08/05/2025 - 16:53:52: "100,10?<374><STEAM_1:1:852206558>" switched from team <TERRORIST> to <Spectator>
+L 08/05/2025 - 16:53:52: "Duffy<379><BOT><>" connected, address ""
+L 08/05/2025 - 16:53:52: "Duffy<379><BOT>" switched from team <Unassigned> to <TERRORIST>
+L 08/05/2025 - 16:53:52: "Duffy<379><BOT><>" entered the game
+Terrorist bot spawned outside of a buy zone (3296, 6551, 1592)
+L 08/05/2025 - 16:53:54: "100,10?<374><STEAM_1:1:852206558>" switched from team <Spectator> to <TERRORIST>
+L 08/05/2025 - 16:53:54: "Duffy<379><BOT><TERRORIST>" disconnected (reason "Kicked by Console")
+L 08/05/2025 - 16:53:54: "Duffy<379><BOT>" switched from team <TERRORIST> to <Unassigned>
+MasterRequestRestart
+Your server needs to be restarted in order to receive the latest update.
+L 08/05/2025 - 16:54:00: Your server needs to be restarted in order to receive the latest update.
+L 08/05/2025 - 16:54:21: "100,10?<374><STEAM_1:1:852206558>" switched from team <TERRORIST> to <Spectator>
+L 08/05/2025 - 16:54:21: "Henry<380><BOT><>" connected, address ""
+L 08/05/2025 - 16:54:21: "Henry<380><BOT>" switched from team <Unassigned> to <CT>
+L 08/05/2025 - 16:54:21: "Henry<380><BOT><>" entered the game
+CT bot spawned outside of a buy zone (3393, 6550, 1592)
+L 08/05/2025 - 16:54:26: "100,10?<374><STEAM_1:1:852206558>" switched from team <Spectator> to <TERRORIST>
+
+
+
+L 08/05/2025 - 17:13:13: "100,10?<391><STEAM_1:1:852206558><>" STEAM USERID validated
+L 08/05/2025 - 17:13:33: "100,10?<391><STEAM_1:1:852206558><>" entered the game
+L 08/05/2025 - 17:13:34: [gokz-lead.smx] Loaded replay
+L 08/05/2025 - 17:13:34: "Tom<393><BOT><>" connected, address ""
+L 08/05/2025 - 17:13:34: "Tom<393><BOT>" switched from team <Unassigned> to <CT>
+L 08/05/2025 - 17:13:34: "Tom<393><BOT><>" entered the game
+L 08/05/2025 - 17:13:34: "Tom<393><BOT><CT>" changed name to "今生-Lzd (06:00.93)"
+L 08/05/2025 - 17:13:36: "100,10?<391><STEAM_1:1:852206558>" switched from team <Unassigned> to <CT>
+L 08/05/2025 - 17:13:36: "今生-Lzd (06:00.93)<393><BOT><CT>" disconnected (reason "Kicked by Console")
+L 08/05/2025 - 17:13:36: "今生-Lzd (06:00.93)<393><BOT>" switched from team <CT> to <Unassigned>

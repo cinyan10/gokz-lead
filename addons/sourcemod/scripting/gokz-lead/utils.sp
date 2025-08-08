@@ -164,7 +164,7 @@ bool GetReplayTickOrigin(int botIndex, int tick, float vec[3])
 	return true;
 }
 
-void kickNonReplayBot()
+public void kickNonReplayBot()
 {
     for (int i = 1; i <= MaxClients; i++)
     {

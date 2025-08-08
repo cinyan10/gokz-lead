@@ -1,16 +1,19 @@
 #include <sourcemod>
 #include <sdktools>
 #include <colorlib>
-
-#include <gokz/core>
 #include <gokz/replays>
 
 #include "gokz-lead/utils.sp"
-#include "gokz-lead/leadbot.sp"
 
-// Handle hLeadTimer = INVALID_HANDLE;
-int g_BeamIndex = -1;
+int leadUserClient = 0; // The player using the lead bot
+int leadBotClient = 0;  // The bot client in-game
+int leadBotIndex = -1;  // The replay bot index
+bool botPaused = false;
+int g_Beam = -1;
+float g_fLastPosition[MAXPLAYERS + 1][3];
+bool g_bTrail[MAXPLAYERS + 1];
 
+Handle hLeadTimer = INVALID_HANDLE;
 
 public Plugin myinfo = 
 {
@@ -22,14 +25,16 @@ public Plugin myinfo =
 };
 
 public void OnPluginStart() {
-    LeadBot_Reset();
     RegConsoleCmd("sm_lead", Command_Lead);
-    RegConsoleCmd("sm_ghost", Command_Ghost); // new
 }
 
 public void OnMapStart() {
-    LeadBot_Reset();
-    g_BeamIndex = PrecacheModel("materials/sprites/purplelaser1.vmt", true);
+    leadUserClient = 0;
+    leadBotClient = 0;
+    leadBotIndex = -1;
+    botPaused = false;
+    hLeadTimer = INVALID_HANDLE;
+    g_Beam = PrecacheModel("materials/sprites/purplelaser1.vmt", true);
 }
 
 public void OnClientPutInServer(int client) {
@@ -58,17 +63,22 @@ public Action Timer_StartReplay(Handle timer, any data) {
     return Plugin_Stop;
 }
 
-public void OnClientDisconnect_Post(int client)
+public void OnPlayerDisconnect(Handle event, const char[] name, bool dontBroadcast)
 {
-    if (client <= 0)
-        return;
+    int userid = GetEventInt(event, "userid");
+    int client = GetClientOfUserId(userid);
+    if (client <= 0) return;
 
-    if (client == g_Lead.user)
-        LeadBot_Reset();
+    if (leadUserClient == client) {
+        leadUserClient = 0;
+        leadBotIndex = -1;
+        KillLeadTimer();
+    }
 }
 
 public Action GOKZ_RP_OnReplaySaved(int client, int replayType, const char[] map, int course, int timeType, float time, const char[] filePath, bool tempReplay)
 {
+    // Delay replay check by 2 seconds to allow other replay operations (e.g. file moving) to complete
     CreateTimer(2.0, Timer_CheckReplayUpdate, _, TIMER_FLAG_NO_MAPCHANGE);
     return Plugin_Continue;
 }
@@ -85,19 +95,27 @@ public Action Timer_CheckReplayUpdate(Handle timer, any data)
     ReadReplayTickCount(bestPath, bestTickCount);
 
     // Always reload if no bot is currently running
-    if (g_Lead.botIndex == -1 || g_Lead.botClient == 0 || !IsClientInGame(g_Lead.botClient))
+    if (leadBotIndex == -1 || leadBotClient == 0 || !IsClientInGame(leadBotClient))
     {
         CreateTimer(0.1, Timer_KickBotsThenStartReplay, _, TIMER_FLAG_NO_MAPCHANGE);
         return Plugin_Stop;
     }
 
-    int currentTickCount = GOKZ_RP_GetTickCount(g_Lead.botIndex);
+    int currentTickCount = GOKZ_RP_GetTickCount(leadBotIndex);
 
     if (bestTickCount != currentTickCount)
     {
         CreateTimer(0.1, Timer_KickBotsThenStartReplay, _, TIMER_FLAG_NO_MAPCHANGE);
     }
     return Plugin_Stop;
+}
+
+
+void KillLeadTimer() {
+    if (hLeadTimer != INVALID_HANDLE) {
+        CloseHandle(hLeadTimer);
+        hLeadTimer = INVALID_HANDLE;
+    }
 }
 
 public int FindFirstHumanClient() {
@@ -127,63 +145,26 @@ void StartReplayForCurrentMap()
     LogMessage("Loaded replay: %s", bestPath);
 }
 
-public Action Command_Ghost(int client, int args)
-{
-    if (!IsClientInGame(client) || IsFakeClient(client))
-        return Plugin_Handled;
-
-    if (g_Lead.user == client)
-    {
-        GOKZ_RP_Resume(g_Lead.botIndex);
-        LeadBot_Reset();
-        CPrintToChat(client, "{lightgreen}[gokz-lead]{default} Ghost stopped.");
-        return Plugin_Handled;
-    }
-
-    if (LeadBot_IsValid())
-    {
-        CPrintToChat(client, "{lightgreen}[gokz-lead]{default} Another player is already using the replay bot.");
-        return Plugin_Handled;
-    }
-
-    for (int i = 1; i <= MaxClients; i++)
-    {
-        int bot = GOKZ_RP_GetBotSlotFromClient(i);
-        if (bot >= 0)
-        {
-            g_Lead.user = client;
-            g_Lead.botClient = i;
-            g_Lead.botIndex = bot;
-            g_Lead.type = LeadBotType_Ghost; // ghost mode
-            g_bTrail[i] = true;
-
-            char name[MAX_NAME_LENGTH];
-            GetClientName(i, name, sizeof(name));
-            CPrintToChat(client, "{lightgreen}[gokz-lead]{default} Using existing replay bot {teamcolor}%s{default} as your ghost. Use !ghost again to stop.", name);
-            return Plugin_Handled;
-        }
-    }
-
-    CPrintToChat(client, "{lightgreen}[gokz-lead]{default} No available replay bot found on this map.");
-    return Plugin_Handled;
-}
-
 public Action Command_Lead(int client, int args) {
-    LogMessage("user %d used !lead", client)
     if (!IsClientInGame(client) || IsFakeClient(client)) return Plugin_Handled;
 
-    // use command again to stop lead
-    if (g_Lead.user == client) {
-        GOKZ_RP_Resume(g_Lead.botIndex);
-        LeadBot_Reset();
+    if (leadUserClient == client) {
+        GOKZ_RP_Resume(leadBotIndex);
+        botPaused = false;
 
         CPrintToChat(client, "{lightgreen}[gokz-lead]{default} Lead stopped.");
+        leadUserClient = 0;
+        leadBotClient = 0;
+        leadBotIndex = -1;
+        g_bTrail[leadBotClient] = false;
+
+        KillLeadTimer();
         return Plugin_Handled;
     }
 
-    // args for manually set distance
     int stopDist = 500;
     int startDist = 200;
+
     if (args >= 2) {
         char arg1[16], arg2[16];
         GetCmdArg(1, arg1, sizeof(arg1));
@@ -197,7 +178,7 @@ public Action Command_Lead(int client, int args) {
         }
     }
 
-    if (LeadBot_IsValid()) {
+    if (leadUserClient > 0) {
         CPrintToChat(client, "{lightgreen}[gokz-lead]{default} Another player is already using the lead bot.");
         return Plugin_Handled;
     }
@@ -206,22 +187,25 @@ public Action Command_Lead(int client, int args) {
     for (int i = 1; i <= MaxClients; i++) {
         bot = GOKZ_RP_GetBotSlotFromClient(i);
         if (bot >= 0) {
-            g_Lead.user = client;
-            g_Lead.botClient = i;
-            g_Lead.botIndex = bot;
-            g_bTrail[i] = true;
-            GetClientAbsOrigin(i, g_Lead.lastPos);
+            leadBotIndex = bot;
+            leadBotClient = i;
+            leadUserClient = client;
+            g_bTrail[leadBotClient] = true;
+            GetClientAbsOrigin(leadBotClient, g_fLastPosition[leadBotClient]);
+
+            botPaused = false;
 
             char name[MAX_NAME_LENGTH];
             GetClientName(i, name, sizeof(name));
             CPrintToChat(client, "{lightgreen}[gokz-lead]{default} Using existing replay bot {teamcolor}%s{default} as your lead. Use !lead again to stop.", name);
 
-            StartLeadFromNearestPoint(g_Lead.user, g_Lead.botIndex);
+            StartLeadFromNearestPoint(leadUserClient, leadBotIndex);
 
+            KillLeadTimer();
             DataPack pack = new DataPack();
             pack.WriteCell(stopDist);
             pack.WriteCell(startDist);
-            g_Lead.timer = CreateTimer(0.2, Timer_LeadCheck, pack, TIMER_REPEAT);
+            hLeadTimer = CreateTimer(0.2, Timer_LeadCheck, pack, TIMER_REPEAT);
             return Plugin_Handled;
         }
     }
@@ -235,18 +219,21 @@ public Action Command_Lead(int client, int args) {
 public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3], float angles[3],
     int &weapon, int &subtype, int &cmdnum, int &tickcount, int &seed, int mouse[2])
 {
-    if (client == g_Lead.botClient && g_bTrail[client] && IsPlayerAlive(client)) {
+    if (client == leadBotClient && g_bTrail[client] && IsPlayerAlive(client))
+    {
         float v1[3], v2[3];
         GetClientAbsOrigin(client, v1);
-        v2 = g_Lead.lastPos;
+        v2 = g_fLastPosition[client];
 
-        TE_SetupBeamPoints(v1, v2, g_BeamIndex, 0, 0, 0, 2.5, 3.0, 3.0, 10, 0.0, {42, 165, 247, 255}, 0);
+        TE_SetupBeamPoints(v1, v2, g_Beam, 0, 0, 0, 2.5, 3.0, 3.0, 10, 0.0, {42, 165, 247, 255}, 0);
         TE_SendToAll();
 
-        g_Lead.lastPos = v1;
+        g_fLastPosition[client] = v1;
     }
+
     return Plugin_Continue;
 }
+
 
 public Action Timer_LeadCheck(Handle timer, any data)
 {
@@ -256,19 +243,22 @@ public Action Timer_LeadCheck(Handle timer, any data)
     int stopDist = pack.ReadCell();
     int startDist = pack.ReadCell();
 
-    if (g_Lead.user == 0 || g_Lead.botClient == 0) return Plugin_Stop;
-    if (!IsClientInGame(g_Lead.user) || !IsClientInGame(g_Lead.botClient)) return Plugin_Stop;
-    if (!IsPlayerAlive(g_Lead.user) || !IsPlayerAlive(g_Lead.botClient)) return Plugin_Stop;
+    if (leadUserClient == 0 || leadBotClient == 0) return Plugin_Stop;
+    if (!IsClientInGame(leadUserClient) || !IsClientInGame(leadBotClient)) return Plugin_Stop;
+    if (!IsPlayerAlive(leadUserClient) || !IsPlayerAlive(leadBotClient)) return Plugin_Stop;
 
     float vecClient[3], vecBot[3];
-    GetClientAbsOrigin(g_Lead.user, vecClient);
-    GetClientAbsOrigin(g_Lead.botClient, vecBot);
+    GetClientAbsOrigin(leadUserClient, vecClient);
+    GetClientAbsOrigin(leadBotClient, vecBot);
     float dist = GetVectorDistance(vecClient, vecBot);
 
-    if (dist > float(stopDist))
-        GOKZ_RP_Pause(g_Lead.botIndex);
-    else if (dist < float(startDist))
-        GOKZ_RP_Resume(g_Lead.botIndex);
+    if (dist > float(stopDist) && !botPaused) {
+        GOKZ_RP_Pause(leadBotIndex);
+        botPaused = true;
+    } else if (dist < float(startDist) && botPaused) {
+        GOKZ_RP_Resume(leadBotIndex);
+        botPaused = false;
+    }
 
     return Plugin_Continue;
 }
@@ -309,29 +299,4 @@ void StartLeadFromNearestPoint(int client, int botIndex)
 	{
         CPrintToChat(client, "{lightgreen}[gokz-lead]{default} No valid tick found.");
 	}
-}
-
-public void GOKZ_OnTimerStart_Post(int client, int course)
-{
-    if (g_Lead.type == LeadBotType_Ghost && g_Lead.user == client && LeadBot_IsValid())
-    {
-        GOKZ_RP_SkipToTick(g_Lead.botIndex, 256);
-        GOKZ_RP_Resume(g_Lead.botIndex);
-    }
-}
-
-public void GOKZ_OnPause_Post(int client)
-{
-    if (g_Lead.type == LeadBotType_Ghost && g_Lead.user == client && LeadBot_IsValid())
-    {
-        GOKZ_RP_Pause(g_Lead.botIndex);
-    }
-}
-
-public void GOKZ_OnResume_Post(int client)
-{
-    if (g_Lead.type == LeadBotType_Ghost && g_Lead.user == client && LeadBot_IsValid())
-    {
-        GOKZ_RP_Resume(g_Lead.botIndex);
-    }
 }
