@@ -7,7 +7,6 @@
 #include "gokz-lead/utils.sp"
 #include "gokz-lead/leadbot.sp"
 
-// Handle hLeadTimer = INVALID_HANDLE;
 int g_BeamIndex = -1;
 static bool hasSpawned[MAXPLAYERS + 1];
 

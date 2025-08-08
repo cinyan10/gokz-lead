@@ -12,7 +12,7 @@ enum struct LeadBot
     bool paused;
     float lastPos[3];
     Handle timer;
-    LeadBotType type; // NEW: bot type
+    LeadBotType type;
 }
 
 LeadBot g_Lead;
@@ -21,9 +21,7 @@ bool g_bTrail[MAXPLAYERS + 1];
 void LeadBot_Reset()
 {
     if (g_Lead.botClient > 0 && g_Lead.botClient <= MaxClients)
-    {
         g_bTrail[g_Lead.botClient] = false;
-    }
 
     g_Lead.user = 0;
     g_Lead.botClient = 0;
@@ -31,11 +29,10 @@ void LeadBot_Reset()
     g_Lead.paused = false;
     g_Lead.type = LeadBotType_Lead; // default type
 
-    if (g_Lead.timer != INVALID_HANDLE)
-    {
+    if (g_Lead.timer != null && g_Lead.timer != INVALID_HANDLE)
         CloseHandle(g_Lead.timer);
-        g_Lead.timer = INVALID_HANDLE;
-    }
+
+    g_Lead.timer = null;
 }
 
 bool LeadBot_IsValid()
