@@ -325,3 +325,10 @@ stock bool FindBestServerRecordReplay(char[] outPath, int maxlen)
     LogMessage("[FindBestServerRecordReplay] No best replay found under: %s", dir);
     return false;
 }
+
+stock void CopyVec(const float src[3], float dest[3])
+{
+    dest[0] = src[0];
+    dest[1] = src[1];
+    dest[2] = src[2];
+}
