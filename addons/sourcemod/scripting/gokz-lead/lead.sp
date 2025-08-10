@@ -141,12 +141,12 @@ static void StartLeadFromNearestPoint(int user, int botSlot)
     float vecUser[3];
     GetClientAbsOrigin(user, vecUser);
 
-    const int step = 32;
+    const int step = 16;
     float best = -1.0;
     int   bestTick = -1;
 
     float vecBot[3];
-    for (int t = 0; t < total; t += step)
+    for (int t = 256; t < total - 256; t += step)
     {
         if (!GetReplayTickOrigin(botSlot, t, vecBot))
             continue;
