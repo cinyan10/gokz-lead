@@ -145,7 +145,6 @@ stock bool FindBestReplayFilePath(char[] outPath, int maxlen)
     if (bestTicks > 0)
     {
         strcopy(outPath, maxlen, bestPath);
-        LogMessage("Best replay path: %s (tickCount = %d)", bestPath, bestTicks);
         return true;
     }
 

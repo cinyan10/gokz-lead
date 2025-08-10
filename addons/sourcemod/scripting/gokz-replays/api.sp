@@ -9,12 +9,29 @@ void CreateNatives()
 	CreateNative("GOKZ_RP_GetPlaybackInfo", Native_RP_GetPlaybackInfo);
 	CreateNative("GOKZ_RP_LoadJumpReplay", Native_RP_LoadJumpReplay);
 	CreateNative("GOKZ_RP_UpdateReplayControlMenu", Native_RP_UpdateReplayControlMenu);
+	CreateNative("GOKZ_RP_GetClientFromBot", Native_RP_GetClientFromBot);
+	CreateNative("GOKZ_RP_SetBotIsAuto", Native_RP_SetBotIsAuto);
 	CreateNative("GOKZ_RP_Pause", Native_RP_Pause);
 	CreateNative("GOKZ_RP_Resume", Native_RP_Resume);
 	CreateNative("GOKZ_RP_GetBotSlotFromClient", Native_RP_GetBotSlotFromClient);
 	CreateNative("GOKZ_RP_SkipToTick", Native_RP_SkipToTick);
 	CreateNative("GOKZ_RP_GetTickCount", Native_RP_GetTickCount);
 	CreateNative("GOKZ_RP_GetTickData", Native_RP_GetTickData);
+}
+
+public int Native_RP_GetClientFromBot(Handle plugin, int numParams)
+{
+    int bot = GetNativeCell(1);
+    if (bot < 0 || bot >= RP_MAX_BOTS) return -1;
+	
+    return GetClientFromBot(bot); // 0 until OnClientPutInServer_Playback runs
+}
+
+public int Native_RP_SetBotIsAuto(Handle plugin, int numParams)
+{
+	int bot = GetNativeCell(1);
+	bool isAuto = GetNativeCell(2);
+	return SetBotIsAuto(bot, isAuto);
 }
 
 public int Native_RP_GetTickData(Handle plugin, int numParams)
@@ -94,8 +111,8 @@ public int Native_RP_LoadJumpReplay(Handle plugin, int numParams)
 	}
 
 	int client = GetNativeCell(1);
-	int botClient = LoadReplayBot(client, path, isAuto);
-	return botClient;
+	int botIndex = LoadReplayBot(client, path, isAuto);
+	return botIndex;
 }
 
 public int Native_RP_UpdateReplayControlMenu(Handle plugin, int numParams)

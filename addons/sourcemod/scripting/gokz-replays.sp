@@ -22,8 +22,6 @@
 
 //#define DEBUG
 
-
-
 public Plugin myinfo = 
 {
 	name = "GOKZ Replays", 

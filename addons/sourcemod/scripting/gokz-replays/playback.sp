@@ -59,6 +59,17 @@ static float botLandingSpeed[RP_MAX_BOTS];
 
 // =====[ PUBLIC ]=====
 
+int GetClientFromBot(int bot)
+{
+	return botClient[bot];
+}
+
+bool SetBotIsAuto(int bot,  bool isAuto)
+{
+	botAuto[bot] = isAuto
+	return true;
+}
+
 int GetTickCount(int bot)
 {
 	return playbackTickData[bot].Length
@@ -138,7 +149,7 @@ int LoadReplayBot(int client, char[] path, bool isAuto = false)
 	ServerCommand("bot_add");
 	botCaller[bot] = client;
 	botAuto[bot] = isAuto;
-	return botClient[bot];
+	return bot;
 }
 
 // Passes the current state of the replay into the HUDInfo struct
