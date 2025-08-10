@@ -22,7 +22,7 @@ public Plugin myinfo =
 public void OnPluginStart() {
     LeadBot_Reset();
     RegConsoleCmd("sm_lead", Command_Lead);
-    RegConsoleCmd("sm_ghost", Command_Ghost); // new
+    RegConsoleCmd("sm_ghost", Command_Ghost);
     HookEvent("player_spawn", OnPlayerSpawn, EventHookMode_Post);
 }
 
@@ -108,15 +108,6 @@ public Action Timer_CheckReplayUpdate(Handle timer, any data)
         CreateTimer(0.1, Timer_KickBotsThenStartReplay, _, TIMER_FLAG_NO_MAPCHANGE);
     }
     return Plugin_Stop;
-}
-
-public int FindFirstHumanClient() {
-    for (int i = 1; i <= MaxClients; i++) {
-        if (IsClientInGame(i) && !IsFakeClient(i)) {
-            return i;
-        }
-    }
-    return 0;
 }
 
 void StartReplayForCurrentMap()

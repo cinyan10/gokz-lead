@@ -1,7 +1,7 @@
 
 #define REPLAY_DIR_FORMAT "addons/sourcemod/data/gokz-replays/_runs/%s/"
 
-void ReadReplayHeader(const char[] path, int &tickCount, char[] mapNameOut, int mapNameSize, int &course)
+stock void ReadReplayHeader(const char[] path, int &tickCount, char[] mapNameOut, int mapNameSize, int &course)
 {
     File file = OpenFile(path, "rb");
     if (file == null) return;
@@ -101,7 +101,7 @@ void ReadReplayHeader(const char[] path, int &tickCount, char[] mapNameOut, int 
     delete file;
 }
 
-bool FindBestReplayFilePath(char[] outPath, int maxlen)
+stock bool FindBestReplayFilePath(char[] outPath, int maxlen)
 {
     char map[64];
     GetCurrentMap(map, sizeof(map));
@@ -152,7 +152,7 @@ bool FindBestReplayFilePath(char[] outPath, int maxlen)
     return false;
 }
 
-bool GetReplayTickOrigin(int botIndex, int tick, float vec[3])
+stock bool GetReplayTickOrigin(int botIndex, int tick, float vec[3])
 {
 	any data[RP_V2_TICK_DATA_BLOCKSIZE];
 	if (!GOKZ_RP_GetTickData(botIndex, tick, data))
@@ -164,7 +164,7 @@ bool GetReplayTickOrigin(int botIndex, int tick, float vec[3])
 	return true;
 }
 
-public void kickNonReplayBot()
+stock void kickNonReplayBot()
 {
     for (int i = 1; i <= MaxClients; i++)
     {
@@ -184,7 +184,7 @@ public void kickNonReplayBot()
     }
 }
 
-void ReadReplayTickCount(const char[] path, int &tickCount)
+stock void ReadReplayTickCount(const char[] path, int &tickCount)
 {
     File file = OpenFile(path, "rb");
     if (file == null) {
@@ -224,4 +224,105 @@ void ReadReplayTickCount(const char[] path, int &tickCount)
     int knife; file.ReadInt32(knife);
 
     delete file;
+}
+
+stock int FindFirstHumanClient()
+{
+    for (int i = 1; i <= MaxClients; i++)
+    {
+        if (IsClientInGame(i) && !IsFakeClient(i))
+            return i;
+    }
+    return 0;
+}
+
+static bool EndsWith(const char[] s, const char[] suffix)
+{
+    int ls = strlen(s), lf = strlen(suffix);
+    if (lf > ls) return false;
+    return StrEqual(s[ls - lf], suffix, false);
+}
+
+static bool HasServerPrefix(const char[] file)
+{
+    // must START with one of these, case-insensitive
+    if (strncmp(file, "0_KZT", 5, false) == 0) return true;
+    if (strncmp(file, "0_VNL", 5, false) == 0) return true;
+    if (strncmp(file, "0_SKZ", 5, false) == 0) return true;
+    return false;
+}
+
+stock bool FindBestServerRecordReplay(char[] outPath, int maxlen)
+{
+    char map[64];
+    GetCurrentMap(map, sizeof(map));
+
+    char dir[PLATFORM_MAX_PATH];
+    Format(dir, sizeof(dir), REPLAY_DIR_FORMAT, map);
+
+    if (!DirExists(dir))
+    {
+        LogMessage("[FindBestServerRecordReplay] Dir not found: %s", dir);
+        return false;
+    }
+
+    DirectoryListing files = OpenDirectory(dir);
+    if (files == null)
+    {
+        LogMessage("[FindBestServerRecordReplay] OpenDirectory failed: %s", dir);
+        return false;
+    }
+
+    int bestTicks = -1;
+    char bestPath[PLATFORM_MAX_PATH];
+    FileType type;
+    char fileName[PLATFORM_MAX_PATH];
+
+    int scanned = 0, considered = 0;
+
+    while (files.GetNext(fileName, sizeof(fileName), type))
+    {
+        if (type != FileType_File) continue;
+        scanned++;
+
+        if (!HasServerPrefix(fileName)) continue;
+        if (!EndsWith(fileName, ".replay")) continue;
+
+        considered++;
+
+        char fullPath[PLATFORM_MAX_PATH];
+        Format(fullPath, sizeof(fullPath), "%s%s", dir, fileName);
+
+        int tickCount = -1, course = -1;
+        char mapName[64] = "";
+
+        // your ReadReplayHeader has a void return — just call it
+        ReadReplayHeader(fullPath, tickCount, mapName, sizeof(mapName), course);
+
+        // Must be same map & course 0, and tickCount parsed
+        if (tickCount <= 0) { LogMessage("[SR] skip (ticks<=0): %s", fileName); continue; }
+        if (!StrEqual(mapName, map, false)) { LogMessage("[SR] skip (map mismatch %s!=%s): %s", mapName, map, fileName); continue; }
+        if (course != 0) { LogMessage("[SR] skip (course=%d): %s", course, fileName); continue; }
+
+        if (bestTicks == -1 || tickCount < bestTicks)
+        {
+            bestTicks = tickCount;
+            strcopy(bestPath, sizeof(bestPath), fullPath);
+        }
+    }
+
+    delete files;
+
+    LogMessage("[FindBestServerRecordReplay] Scanned=%d, Considered=%d, BestTicks=%d, Dir=%s",
+               scanned, considered, bestTicks, dir);
+
+    if (bestTicks > 0)
+    {
+        strcopy(outPath, maxlen, bestPath);
+        LogMessage("[FindBestServerRecordReplay] Best: %s", bestPath);
+        return true;
+    }
+
+    LogMessage("[FindBestServerRecordReplay] No best replay found under: %s", dir);
+    return false;
 }
