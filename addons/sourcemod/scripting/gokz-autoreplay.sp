@@ -41,8 +41,8 @@ public void OnClientPutInServer(int client) {
 
 public Action GOKZ_RP_OnReplaySaved(int client, int replayType, const char[] map, int course, int timeType, float time, const char[] filePath, bool tempReplay)
 {
-    // CreateTimer(2.0, Timer_CheckAndMaybeReloadReplay, _, TIMER_FLAG_NO_MAPCHANGE);
-    return Plugin_Continue;
+    CreateTimer(2.0, Timer_CheckAndMaybeReloadReplay, _, TIMER_FLAG_NO_MAPCHANGE);
+    return Plugin_Handled;
 }
 
 public Action Timer_KickBotsThenStartReplay(Handle timer, any data)

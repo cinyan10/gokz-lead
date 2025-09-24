@@ -80,7 +80,7 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
     GetClientAbsOrigin(client, v1);
     CopyVec(g_Session[owner].lastPos, v2);
 
-    TE_SetupBeamPoints(v1, v2, g_BeamIndex, 0, 0, 0, 2.5, 3.0, 3.0, 10, 0.0, {42, 165, 247, 255}, 0);
+    TE_SetupBeamPoints(v1, v2, g_BeamIndex, 0, 0, 0, 4.0, 10.0, 10.0, 10, 0.0, {42, 165, 247, 255}, 0);
     TE_SendToClient(owner);
 
     CopyVec(v1, g_Session[owner].lastPos);

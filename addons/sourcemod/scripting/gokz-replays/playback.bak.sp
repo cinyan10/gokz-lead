@@ -742,25 +742,26 @@ static bool LoadFormatVersion2Replay(File file, int client, int bot)
 	
 	// Read tick data
 	preAndPostRunTickCount = RoundToZero(RP_PLAYBACK_BREATHER_TIME / GetTickInterval());
-	any tickData[RP_V2_TICK_DATA_BLOCKSIZE];
+	any tickDataArray[RP_V2_TICK_DATA_BLOCKSIZE];
 	for (int i = 0; i < tickCount; i++)
 	{
-		file.ReadInt32(tickData[RPDELTA_DELTAFLAGS]);
+		file.ReadInt32(tickDataArray[RPDELTA_DELTAFLAGS]);
 		
-		for (int index = 1; index < sizeof(tickData); index++)
+		for (int index = 1; index < sizeof(tickDataArray); index++)
 		{
 			int currentFlag = (1 << index);
-			if (tickData[RPDELTA_DELTAFLAGS] & currentFlag)
+			if (tickDataArray[RPDELTA_DELTAFLAGS] & currentFlag)
 			{
-				file.ReadInt32(tickData[index]);
+				file.ReadInt32(tickDataArray[index]);
 			}
 		}
 		
+		ReplayTickData tickData;
+		TickDataFromArray(tickDataArray, tickData);
 		// HACK: Jump replays don't record proper length sometimes. I don't know why.
 		//		 This leads to oversized replays full of 0s at the end.
 		// 		 So, we do this horrible check to dodge that issue.
-		if (tickData[RPDELTA_ORIGIN_X] == 0 && tickData[RPDELTA_ORIGIN_Y] == 0 && tickData[RPDELTA_ORIGIN_Z] == 0 
-			&& tickData[RPDELTA_ANGLES_X] == 0 && tickData[RPDELTA_ANGLES_Y] == 0)
+		if (tickData.origin[0] == 0 && tickData.origin[1] == 0 && tickData.origin[2] == 0 && tickData.angles[0] == 0 && tickData.angles[1] == 0)
 		{
 			break;
 		}
@@ -886,7 +887,7 @@ static void PlaybackVersion1(int client, int bot, int &buttons)
 				ServerCommand("bot_kick %s", botName[bot]);
 				return;
 			}
-
+			
 		}
 		
 		// Load in the next tick
@@ -1259,6 +1260,7 @@ void PlaybackVersion2Post(int client, int bot)
 	{
 		return;
 	}
+
 	int size = playbackTickData[bot].Length;
 	if (playbackTick[bot] != 0 && playbackTick[bot] != (size - 1))
 	{
@@ -1465,12 +1467,9 @@ static void SetBotName(int bot)
 
 	if (botReplayType[bot] == ReplayType_Run)
 	{
-		// Convert to database format and back so the formatting is consistent...
-		float time = GOKZ_DB_TimeIntToFloat(GOKZ_DB_TimeFloatToInt(botTime[bot]));
-
 		// DanZay (01:23.45)
 		FormatEx(name, sizeof(name), "%s (%s)", 
-			botAlias[bot], GOKZ_FormatTime(time));
+			botAlias[bot], GOKZ_FormatTime(botTime[bot]));
 	}
 	else if (botReplayType[bot] == ReplayType_Jump)
 	{

@@ -36,8 +36,6 @@ bool gB_GOKZLocalDB;
 char gC_CurrentMap[64];
 int gI_CurrentMapFileSize;
 bool gB_HideNameChange;
-bool gB_NubRecordMissed[MAXPLAYERS + 1];
-ArrayList g_ReplayInfoCache;
 Address gA_BotDuckAddr;
 int gI_BotDuckPatchRestore[40]; // Size of patched section in gamedata
 int gI_BotDuckPatchLength;
@@ -48,8 +46,6 @@ DynamicDetour gH_DHooks_TeamFull;
 #include "gokz-replays/nav.sp"
 #include "gokz-replays/playback.sp"
 #include "gokz-replays/recording.sp"
-#include "gokz-replays/replay_cache.sp"
-#include "gokz-replays/replay_menu.sp"
 #include "gokz-replays/api.sp"
 #include "gokz-replays/controls.sp"
 
@@ -69,7 +65,6 @@ public void OnPluginStart()
 	LoadTranslations("gokz-common.phrases");
 	LoadTranslations("gokz-replays.phrases");
 	
-	CreateGlobalForwards();
 	HookEvents();
 	RegisterCommands();
 }
@@ -120,7 +115,6 @@ public void OnMapStart()
 	UpdateCurrentMap(); // Do first
 	OnMapStart_Nav();
 	OnMapStart_Recording();
-	OnMapStart_ReplayCache();
 }
 
 public void OnConfigsExecuted()
@@ -238,7 +232,6 @@ public Action GOKZ_OnTimerStart(int client, int course)
 
 public void GOKZ_OnTimerStart_Post(int client, int course)
 {
-	gB_NubRecordMissed[client] = false;
 	GOKZ_OnTimerStart_Post_Recording(client);
 }
 
@@ -267,11 +260,6 @@ public void GOKZ_OnCountedTeleport_Post(int client)
 	GOKZ_OnCountedTeleport_Recording(client);
 }
 
-public void GOKZ_LR_OnRecordMissed(int client, float recordTime, int course, int mode, int style, int recordType)
-{
-	GOKZ_LR_OnRecordMissed_Recording(client, recordType);
-}
-
 public void GOKZ_AC_OnPlayerSuspected(int client, ACReason reason)
 {
 	GOKZ_AC_OnPlayerSuspected_Recording(client, reason);
@@ -279,7 +267,7 @@ public void GOKZ_AC_OnPlayerSuspected(int client, ACReason reason)
 
 public void GOKZ_DB_OnJumpstatPB(int client, int jumptype, int mode, float distance, int block, int strafes, float sync, float pre, float max, int airtime)
 {
-	GOKZ_DB_OnJumpstatPB_Recording(client, jumptype, distance, block, strafes, sync, pre, max, airtime);
+	GOKZ_DB_OnJumpstatPB_Recording(client, jumptype, mode, distance, block, strafes, sync, pre, max, airtime);
 }
 
 public void GOKZ_OnOptionsLoaded(int client)
@@ -325,7 +313,6 @@ static void UpdateCurrentMap()
 	gI_CurrentMapFileSize = GetCurrentMapFileSize();
 }
 
-
 // =====[ PUBLIC ]=====
 
 // NOTE: These serialisation functions were made because the internal data layout of enum structs can change.
@@ -354,7 +341,7 @@ void TickDataToArray(ReplayTickData tickData, any result[RP_V2_TICK_DATA_BLOCKSI
 	result[19] = tickData.buttonsForced;
 }
 
-void TickDataFromArray(any array[RP_V2_TICK_DATA_BLOCKSIZE], ReplayTickData result)
+stock void TickDataFromArray(any array[RP_V2_TICK_DATA_BLOCKSIZE], ReplayTickData result)
 {
 	// NOTE: HAS to match ReplayTickData exactly!
 	result.deltaFlags          = array[0];

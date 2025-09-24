@@ -3,26 +3,27 @@
 
 stock void ReadReplayHeader(const char[] path, int &tickCount, char[] mapNameOut, int mapNameSize, int &course)
 {
+    tickCount = -1;
+    course = -1;
+    if (mapNameSize > 0) mapNameOut[0] = '\0';
+
     File file = OpenFile(path, "rb");
     if (file == null) return;
 
-    int magic; file.ReadInt32(magic);
+    int magic;  file.ReadInt32(magic);
     int format; file.ReadInt8(format);
-    int type; file.ReadInt8(type); // 0=Run, 1=Jump, 2=Cheater
+    int type;   file.ReadInt8(type); // 0=Run, 1=Jump, 2=Cheater
 
-    int len;
     char mapName[64];
 
     if (format == 1)
     {
         // Skip GOKZ version
-        file.ReadInt8(len);
-        file.Seek(len, SEEK_CUR);
+        char tmp[2];
+        ReadPascalStringClamped(file, tmp, sizeof(tmp));
 
         // Map name
-        file.ReadInt8(len);
-        file.ReadString(mapName, sizeof(mapName), len);
-        mapName[len] = '\0';
+        ReadPascalStringClamped(file, mapName, sizeof(mapName));
 
         // Read course
         file.ReadInt32(course);
@@ -34,16 +35,13 @@ stock void ReadReplayHeader(const char[] path, int &tickCount, char[] mapNameOut
         file.Seek(12, SEEK_CUR);
 
         // Skip SteamID2
-        file.ReadInt8(len);
-        file.Seek(len, SEEK_CUR);
+        ReadPascalStringClamped(file, tmp, sizeof(tmp));
 
         // Skip IP
-        file.ReadInt8(len);
-        file.Seek(len, SEEK_CUR);
+        ReadPascalStringClamped(file, tmp, sizeof(tmp));
 
         // Skip alias
-        file.ReadInt8(len);
-        file.Seek(len, SEEK_CUR);
+        ReadPascalStringClamped(file, tmp, sizeof(tmp));
 
         // Read tick count
         file.ReadInt32(tickCount);
@@ -51,20 +49,17 @@ stock void ReadReplayHeader(const char[] path, int &tickCount, char[] mapNameOut
     else if (format == 2)
     {
         // Skip GOKZ version
-        file.ReadInt8(len);
-        file.Seek(len, SEEK_CUR);
+        char tmp[2];
+        ReadPascalStringClamped(file, tmp, sizeof(tmp));
 
         // Map name
-        file.ReadInt8(len);
-        file.ReadString(mapName, sizeof(mapName), len);
-        mapName[len] = '\0';
+        ReadPascalStringClamped(file, mapName, sizeof(mapName));
 
         // Skip mapFileSize, ip, timestamp (3x Int32)
         file.Seek(12, SEEK_CUR);
 
         // Skip alias
-        file.ReadInt8(len);
-        file.Seek(len, SEEK_CUR);
+        ReadPascalStringClamped(file, tmp, sizeof(tmp));
 
         // Skip steamid (Int32), mode (Int8), style (Int8), sens (Int32), yaw (Int32), tickrate (Int32)
         file.Seek(4 + 1 + 1 + 4 + 4 + 4, SEEK_CUR);
@@ -75,28 +70,22 @@ stock void ReadReplayHeader(const char[] path, int &tickCount, char[] mapNameOut
         // Skip weapon, knife
         file.Seek(8, SEEK_CUR);
 
-        // If it's a run, read time and course
-        if (type == ReplayType_Run)
+        // If it's a run, skip time and read course
+        if (type == 0 /* ReplayType_Run */)
         {
-            // Skip time
-            file.Seek(4, SEEK_CUR);
-
-            // Read course
-            file.ReadInt8(course);
+            file.Seek(4, SEEK_CUR);     // time
+            file.ReadInt8(course);      // course
         }
         else
         {
-            course = -1; // N/A
+            course = -1;
         }
     }
-    else
-    {
-        delete file;
-        return;
-    }
+    // Unknown format: leave defaults
 
     // Copy map name out
-    strcopy(mapNameOut, mapNameSize, mapName);
+    if (mapNameSize > 0)
+        strcopy(mapNameOut, mapNameSize, mapName);
 
     delete file;
 }
@@ -115,23 +104,23 @@ stock bool FindBestReplayFilePath(char[] outPath, int maxlen)
     int bestTicks = -1;
     char bestPath[PLATFORM_MAX_PATH];
     char fileName[PLATFORM_MAX_PATH];
-    FileType type;
+    FileType ftype;
 
-    while (files.GetNext(fileName, sizeof(fileName), type))
+    while (files.GetNext(fileName, sizeof(fileName), ftype))
     {
-        if (type != FileType_File || !StrContains(fileName, ".replay", false))
-            continue;
+        if (ftype != FileType_File) continue;
+        if (StrContains(fileName, ".replay", false) == -1) continue;
 
         char fullPath[PLATFORM_MAX_PATH];
         Format(fullPath, sizeof(fullPath), "%s%s", dir, fileName);
 
-        int tickCount, course;
-        char mapName[64];
+        int tickCount = -1, course = -1;
+        char mapName[64] = "";
         ReadReplayHeader(fullPath, tickCount, mapName, sizeof(mapName), course);
 
-        // Must be current map & course 0
-        if (!StrEqual(mapName, map, false) || course != 0)
-            continue;
+        if (tickCount <= 0) continue;
+        if (!StrEqual(mapName, map, false)) continue;
+        if (course != 0) continue;
 
         if (bestTicks == -1 || tickCount < bestTicks)
         {
@@ -147,9 +136,9 @@ stock bool FindBestReplayFilePath(char[] outPath, int maxlen)
         strcopy(outPath, maxlen, bestPath);
         return true;
     }
-
     return false;
 }
+
 
 stock bool GetReplayTickOrigin(int botIndex, int tick, float vec[3])
 {
@@ -185,42 +174,35 @@ stock void kickNonReplayBot()
 
 stock void ReadReplayTickCount(const char[] path, int &tickCount)
 {
+    tickCount = -1;
     File file = OpenFile(path, "rb");
-    if (file == null) {
-        LogMessage(" Failed to open file: %s", path);
-        return;
-    }
+    if (file == null) return;
 
-    int magic; file.ReadInt32(magic);
+    int magic;  file.ReadInt32(magic);
     int format; file.ReadInt8(format);
-    int type; file.ReadInt8(type);
+    int type;   file.ReadInt8(type);
 
-    int len;
-    file.ReadInt8(len);
-    char gokzVersion[64];
-    file.ReadString(gokzVersion, sizeof(gokzVersion), len);
+    char scratch[64];
 
-    file.ReadInt8(len);
-    char mapName[64];
-    file.ReadString(mapName, sizeof(mapName), len);
+    // gokzVersion
+    ReadPascalStringClamped(file, scratch, sizeof(scratch));
+    // mapName
+    ReadPascalStringClamped(file, scratch, sizeof(scratch));
 
-    int mapFileSize; file.ReadInt32(mapFileSize);
-    int ip; file.ReadInt32(ip);
-    int timestamp; file.ReadInt32(timestamp);
+    // mapFileSize, ip, timestamp
+    file.Seek(12, SEEK_CUR);
 
-    file.ReadInt8(len);
-    char alias[64];
-    file.ReadString(alias, sizeof(alias), len);
+    // alias
+    ReadPascalStringClamped(file, scratch, sizeof(scratch));
 
-    int steamid; file.ReadInt32(steamid);
-    int mode; file.ReadInt8(mode);
-    int style; file.ReadInt8(style);
-    int sens; file.ReadInt32(sens);
-    int yaw; file.ReadInt32(yaw);
-    int tickrate; file.ReadInt32(tickrate);
+    // steamid, mode, style, sens, yaw, tickrate
+    file.Seek(4 + 1 + 1 + 4 + 4 + 4, SEEK_CUR);
+
+    // tickCount
     file.ReadInt32(tickCount);
-    int weapon; file.ReadInt32(weapon);
-    int knife; file.ReadInt32(knife);
+
+    // weapon, knife
+    file.Seek(8, SEEK_CUR);
 
     delete file;
 }
@@ -259,49 +241,32 @@ stock bool FindBestServerRecordReplay(char[] outPath, int maxlen)
     char dir[PLATFORM_MAX_PATH];
     Format(dir, sizeof(dir), REPLAY_DIR_FORMAT, map);
 
-    if (!DirExists(dir))
-    {
-        LogMessage("[FindBestServerRecordReplay] Dir not found: %s", dir);
-        return false;
-    }
+    if (!DirExists(dir)) return false;
 
     DirectoryListing files = OpenDirectory(dir);
-    if (files == null)
-    {
-        LogMessage("[FindBestServerRecordReplay] OpenDirectory failed: %s", dir);
-        return false;
-    }
+    if (files == null) return false;
 
     int bestTicks = -1;
     char bestPath[PLATFORM_MAX_PATH];
-    FileType type;
+    FileType ftype;
     char fileName[PLATFORM_MAX_PATH];
 
-    int scanned = 0, considered = 0;
-
-    while (files.GetNext(fileName, sizeof(fileName), type))
+    while (files.GetNext(fileName, sizeof(fileName), ftype))
     {
-        if (type != FileType_File) continue;
-        scanned++;
-
+        if (ftype != FileType_File) continue;
         if (!HasServerPrefix(fileName)) continue;
         if (!EndsWith(fileName, ".replay")) continue;
-
-        considered++;
 
         char fullPath[PLATFORM_MAX_PATH];
         Format(fullPath, sizeof(fullPath), "%s%s", dir, fileName);
 
         int tickCount = -1, course = -1;
         char mapName[64] = "";
-
-        // your ReadReplayHeader has a void return — just call it
         ReadReplayHeader(fullPath, tickCount, mapName, sizeof(mapName), course);
 
-        // Must be same map & course 0, and tickCount parsed
-        if (tickCount <= 0) { LogMessage("[SR] skip (ticks<=0): %s", fileName); continue; }
-        if (!StrEqual(mapName, map, false)) { LogMessage("[SR] skip (map mismatch %s!=%s): %s", mapName, map, fileName); continue; }
-        if (course != 0) { LogMessage("[SR] skip (course=%d): %s", course, fileName); continue; }
+        if (tickCount <= 0) continue;
+        if (!StrEqual(mapName, map, false)) continue;
+        if (course != 0) continue;
 
         if (bestTicks == -1 || tickCount < bestTicks)
         {
@@ -312,23 +277,40 @@ stock bool FindBestServerRecordReplay(char[] outPath, int maxlen)
 
     delete files;
 
-    LogMessage("[FindBestServerRecordReplay] Scanned=%d, Considered=%d, BestTicks=%d, Dir=%s",
-               scanned, considered, bestTicks, dir);
-
     if (bestTicks > 0)
     {
         strcopy(outPath, maxlen, bestPath);
-        LogMessage("[FindBestServerRecordReplay] Best: %s", bestPath);
         return true;
     }
-
-    LogMessage("[FindBestServerRecordReplay] No best replay found under: %s", dir);
     return false;
 }
-
 stock void CopyVec(const float src[3], float dest[3])
 {
     dest[0] = src[0];
     dest[1] = src[1];
     dest[2] = src[2];
+}
+
+static void ReadPascalStringClamped(File file, char[] out, int outSize)
+{
+    int len; 
+    file.ReadInt8(len);
+
+    if (outSize <= 0) return;
+
+    int copyLen = len;
+    if (copyLen > outSize - 1) copyLen = outSize - 1;
+    if (copyLen < 0) copyLen = 0;
+
+    if (copyLen > 0)
+        file.ReadString(out, outSize, copyLen);
+    else
+        out[0] = '\0';
+
+    // Skip any remaining bytes from this field if it was longer than our buffer.
+    if (len > copyLen)
+        file.Seek(len - copyLen, SEEK_CUR);
+
+    // Ensure null-termination (ReadString with explicit count doesn't do it).
+    out[copyLen] = '\0';
 }

@@ -1,3 +1,4 @@
+
 public Action Command_Lead(int client, int args)
 {
     if (!IsClientInGame(client) || IsFakeClient(client))
